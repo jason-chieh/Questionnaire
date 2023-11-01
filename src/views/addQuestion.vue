@@ -12,6 +12,8 @@ export default{
 
             // 問卷的陣列
             questionArr:[],
+            // 選擇問題的陣列索引
+            indexArr:[],
             // 問卷的內容
             question:"",
             mustbechoose:"",
@@ -58,15 +60,25 @@ export default{
             let questionObj={
                 question:this.question,
                 mustbechoose:mustbechoosechiense,
-                questionkind:kind,
+                questionkind:kind
             }
             if(this.question=="" || this.questionanswer==[]){
                 alert("必須填寫問題")
             }else{
                 this.questionArr.push(questionObj)
+                this.indexArr.push(false)
                 this.question = ""
                 this.mustbechoose = ""
                 this.questionanswer = ""
+            }
+        },
+        delQuestion(){
+            for (let i = 0; i < this.indexArr.length; i++) {
+                if (this.indexArr[i] == true) {
+                    this.questionArr.splice(i, 1);
+                    this.indexArr.splice(i, 1);
+                    i--
+                }
             }
         }
     },
@@ -84,8 +96,9 @@ export default{
     ...mapState(day,["nowday","sevenday"])
     },
     updated(){
-        // const one = document.getElementById("one")
-        // console.log(one.text)
+        // const checkboxt = document.getElementById("checkboxt")
+        console.log(this.indexArr)
+        console.log(this.indexArr.length)
     }
 }
 </script>
@@ -126,9 +139,8 @@ export default{
                     <label class="labelq" for="">選擇答案:</label>
                     <input class="inputq" type="text" v-model="questionanswer">
                     <button @click="addQuestion" class="addBtn" type="button">送出</button>
-                    <button class="delBtn" type="button">刪除</button>
+                    <button @click="delQuestion" class="delBtn" type="button">刪除</button>
                 </div>
-
 
                 <div class="addQuestionBot">
                     <table>
@@ -144,7 +156,7 @@ export default{
                         </thead>
                         <tbody>
                             <tr v-for="item,index in questionArr" >
-                                <td ><input type="checkbox" :key="index"></td>
+                                <td ><input type="checkbox" id="checkboxt" :key="index" v-model="indexArr[index]"></td>
                                 <td >{{index+1}}</td>
                                 <td ><a href="#">{{item.question}}</a></td>
                                 <td>{{item.questionkind}}</td>
@@ -182,6 +194,7 @@ export default{
                     </div>
                 </div>
             </div>
+
             <div class="bot">
                 <button @click="gotoback" class="chancel buttont" type="button">取消新增</button>
                 <button @click="gotoback" class="send buttont" type="button">確定新增</button>

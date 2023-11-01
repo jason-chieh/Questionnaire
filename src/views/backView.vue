@@ -62,7 +62,7 @@ export default{
             <button @click="gotoaddQuestion" class="add bb" type="button">add</button>
             <button class="delete bb" type="button">delete</button>
         </div>
-        <div class="showBlock">s
+        <div class="showBlock">
                     <table>
                     <thead>
                         <tr>
