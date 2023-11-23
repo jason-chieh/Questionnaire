@@ -77,8 +77,9 @@ export default{
         <input id="inp" type="text">
         <button type="submit" @click="addquestionnaire" id="btn">按我新增問卷到資料庫</button>
         <button type="submit" @click="search" id="btn">按我查詢資料庫</button>
-
     </div>
+
+    
 </template>
 
 <style lang="scss" scoped>

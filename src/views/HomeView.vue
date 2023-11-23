@@ -2,137 +2,193 @@
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
 export default{
-  data(){
-    return{
-      x:5,
-      arr2:[1,2,3,4],
-      pages: Array.from({ length: 10 }, (_, i) => i + 1),
-      content: ''
+    data(){
+        return{
+        // 問卷總表
+        allQuestionnaire:[],
+        //問卷分頁
+        perpage: 6, //一頁的資料數
+        currentPage: 1,
+        //搜尋標題
+        searchText:"",
+        searchStartDate: "",
+        searchEndDate:"",
+        }
+    },
+    components:{
+        
+    },
+    methods:{
+        gocal(){
+        this.$router.push("/CalView")
+        },
+        gotovote(){
+        this.$router.push("/vote")
+        },
+        // 後端抓取問卷全部資料
+        searchAllQn(){
+            const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
+            // 要帶入的值
+
+            const queryParams = new URLSearchParams({
+            title: this.searchText,
+            startDate: this.searchStartDate,
+            endDate: this.searchEndDate,
+            isPublished:true
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.allQuestionnaire = data;
+            this.allQuestionnaire = this.allQuestionnaire.questionnaireList;
+            this.allQuestionnaire = this.allQuestionnaire.reverse();
+            console.log(this.allQuestionnaire)
+            })
+        },
+        // 設定頁籤
+        setPage(page) {
+            if(page <= 0 || page > this.totalPage) {
+                return
+            }
+            this.currentPage = page
+        },
+        // 執行方法獲得日期
+        ...mapActions(day,["getCurrentDate"]),
+    },
+
+    mounted(){
+        // 抓取日期
+        this.getCurrentDate()
+        // 要把值設定給畫面
+        const logindate = document.getElementById('logindate')
+        // const sevendate = document.getElementById('sevendate')
+        this.searchStartDate = this.nowday
+        // this.searchEndDate = this.sevenday
+        logindate.value = this.nowday
+        // sevendate.value = this.sevenday
+
+        // 去找資料庫前台列表
+        this.searchAllQn()
+
+
+        },
+        computed:{
+        // 抓取pinia裡面算出的值今天日期跟七天後
+        ...mapState(day,["nowday","sevenday"])
+        ,
+        // 頁面頁籤計算
+        totalPage() {
+        return Math.ceil(this.allQuestionnaire.length / this.perpage)
+                    //Math.ceil()取最小整數
+        },
+        pageStart() {
+            return (this.currentPage - 1) * this.perpage
+                    //取得該頁第一個值的index
+        },
+        pageEnd() {
+            return this.currentPage * this.perpage
+                    //取得該頁最後一個值的index
+        }
+    },
+    updated(){
     }
-  },
-  components:{
-    
-  },
-  methods:{
-    gocal(){
-      this.$router.push("/CalView")
-    },
-    gotovote(){
-      this.$router.push("/vote")
-    },
-    // 後端抓取問卷全部資料
-    searchAllQn(){
-        const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
-        // 要帶入的值
-        const queryParams = new URLSearchParams({
-        title: "",
-        start_Date: null,
-        end_Date: null,
-        });
 
-        // 將查詢字串附加到 URL
-        const urlWithParams = `${url}?${queryParams}`;
-
-        fetch(urlWithParams, {
-        method: "GET", 
-        headers: new Headers({
-            "Accept":"application/json",
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin":"*"
-        }),
-        })
-        // .then((res) => res.json())
-        // .then((response) => 
-        // console.log(response)
-        // );
-        .then(response => {
-        // 將API回應轉換為JSON格式
-        return response.json();
-        })
-        .then(data => {
-        // 將API回應的JSON數據設置到組件的responseData數據屬性中
-        this.allData1 = data;
-        this.allData1 = this.allData1.questionnaireList;
-        console.log(this.allData1)
-        })
-    },
-    // 執行方法獲得日期
-    ...mapActions(day,["getCurrentDate"]),
-  },
-  mounted(){
-    // 抓取日期
-    this.getCurrentDate()
-    // 要把值設定給畫面
-    const logindate = document.getElementById('logindate')
-    const sevendate = document.getElementById('sevendate')
-    logindate.value = this.nowday
-    sevendate.value = this.sevenday
-  },
-  computed:{
-    // 抓取pinia裡面算出的值今天日期跟七天後
-    ...mapState(day,["nowday","sevenday"])
-  }
 }
 </script>
 
 <template>
-  <div class="bg">  
-      <div class="searchBlock">
+    <div class="bg">  
+        <!-- 搜尋列 -->
+        <div class="searchBlock">
             <div class="searchBlockLeft">
                     <div class="title">
                         <label for="">問卷標題:</label>
-                        <input type="text"><br>
+                        <input type="text" v-model="this.searchText"><br>
                     </div>
                     <div class="time">
                         <label for="">問卷時間:</label>
-                        <input id="logindate" type="date">
-                        <input id="sevendate" class="input1" type="date">
+                        <input id="logindate" type="date" v-model="this.searchStartDate">
+                        <input id="sevendate" class="input1" type="date" v-model="this.searchEndDate">
                     </div>
             </div>
             <div class="searchBlockRight">
-                <button class="search bb" type="button">search</button>
+                <button @click="searchAllQn()" class="search bb" type="button">search</button>
             </div>
-      </div>
-      <div class="showBlock">
-              <table>
-                  <thead>
-                      <tr>
-                          <th>編號</th>
-                          <th>問卷</th>
-                          <th>狀態</th>
-                          <th>開始時間</th>
-                          <th>結束時間</th>
-                          <th>觀看統計</th>
-                      </tr>
-                  </thead>
+        </div>
+        <!-- 問卷修出內容 -->
+        <div class="showBlock">
+            <table>
+                    <thead>
+                        <tr>
+                            <th>編號</th>
+                            <th>問卷</th>
+                            <th>狀態</th>
+                            <th>開始時間</th>
+                            <th>結束時間</th>
+                            <th>觀看統計</th>
+                        </tr>
+                    </thead>
                 <tbody>
-                    <tr v-for="item, index in arr2">
-                        <td >{{item}}</td>
-                        <td :key="index" @click="gotovote(index)"><a href="#">問卷標題1</a></td>
-                        <td>已完成</td>
-                        <td>2023-10-26 10:00 AM</td>
-                        <td>2023-10-30 10:00 AM</td>
+                    <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
+                        <td >{{item.id}}</td>
+                        <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}1</a></td>
+                        <td>{{this.nowday>item.endDate? "停止中":"開放中"}}</td>
+                        <td>{{item.startDate}}</td>
+                        <td>{{item.endDate}}</td>
                         <td :key="index" @click="gocal(index)"><a href="#">統計連結</a></td>
                     </tr>
                     <!-- 可以继续添加更多的行 -->
                 </tbody>
-              </table>
-      </div>
-  </div>
-
+            </table>
+        </div>
+        <!-- 底下頁籤 -->
+        <div class="pageNumber">
+            <ul class="pagination">
+                <li class="page-item" @click.prevent="setPage(currentPage-1)">
+                    <a class="page-link" href="#" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" :class="{'active': (currentPage === (n))}"
+                v-for="(n, index) in totalPage" :key="index" @click.prevent="setPage(n)">
+                    <a class="page-link" href="#">{{ n }}</a>
+                </li>
+                <li class="page-item" @click.prevent="setPage(currentPage+1)">
+                    <a class="page-link" href="#" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
 </template>
 
 <style lang="scss" scoped>
 $maincolor:#00A9FF;
 .bg{
-  width: 100vw;
-  height: 90vh;
-  background-color: #00A9FF;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  .searchBlock{
+width: 100vw;
+height: 90vh;
+background-color: #00A9FF;
+display: flex;
+justify-content: center;
+align-items: center;
+flex-direction: column;
+    .searchBlock{
         width: 80vw;
         height: 20vh;
         background-color: rgb(218, 218, 218);
@@ -200,10 +256,9 @@ $maincolor:#00A9FF;
             }
         }
     }
-  .showBlock{
+    .showBlock{
     margin-top: 5vh;
     width: 80vw;
-    height: 41vh;
     background-color: rgb(218, 218, 218);
     border-radius: 5px;
     table {
@@ -218,6 +273,19 @@ $maincolor:#00A9FF;
         th {
             background-color: rgb(187, 186, 186);
         }
-  }
+    }
+    .pageNumber{
+        width: 30vw;
+        height: 10vh;
+        .pagination{
+            display: flex;
+            justify-content:space-around;
+            list-style: none;
+            padding: 0;
+            .page-item{
+                font-size: 16pt;
+            }
+        }
+    }
 }
 </style>

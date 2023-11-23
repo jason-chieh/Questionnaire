@@ -5,22 +5,38 @@ import day from '../stores/day'
 export default{
     data(){
         return{
+            // 拿到全部問卷
+            allQuestionnaire:[],
+            lastestId:1,
             // 題目標題跟題目製作畫面切換
             page:1,
             editPage:1,
             selectMode:1,
 
             // 問卷的陣列
-            questionArr:[],
+            question_list:[],
             // 選擇問題的陣列索引
             indexArr:[],
             // 問卷的內容
             question:"",
+            quNum:1,
             mustbechoose:"",
             questionanswer:"",
+            //問卷的總標題+描述內容+時間
+            questionnaireName:"",
+            questionnaireContent:"",
+            questionnaireStartDate:"",
+            questionnaireEndDate:""
+            // 問卷的問題們
+
+
+            
         }
     },
     methods:{
+        goCheckPage(){
+            this.page=2.5
+        },
         goCalCircle(){
             this.page=4
         },
@@ -35,6 +51,12 @@ export default{
         },
         gotoback(){
             this.$router.push("/backView")
+
+        },
+        gotobackAndAdd(){
+            this.addquestionnaire();
+            this.$router.push("/backView")
+
         },
         goedit(){
             this.editPage=2
@@ -64,29 +86,95 @@ export default{
             }
 
             let questionObj={
-                question:this.question,
-                mustbechoose:mustbechoosechiense,
-                questionkind:kind
+                quid:this.quNum,
+                qnid:this.lastestId,
+                qtitle:this.question,
+                optionType:kind,
+                necessary:this.mustbechoose,
+                option:this.questionanswer
             }
-            if(this.question=="" || this.questionanswer==[]){
-                alert("必須填寫問題")
-            }else{
-                this.questionArr.push(questionObj)
-                this.indexArr.push(false)
-                this.question = ""
-                this.mustbechoose = ""
-                this.questionanswer = ""
-            }
+
+            this.question_list.push(questionObj)
+            this.indexArr.push(false)
+            this.question = ""
+            this.mustbechoose = ""
+            this.questionanswer = ""
+            this.quNum++
+            
+            
         },
+        // 刪除問題
         delQuestion(){
             for (let i = 0; i < this.indexArr.length; i++) {
                 if (this.indexArr[i] == true) {
-                    this.questionArr.splice(i, 1);
+                    this.question_list.splice(i, 1);
                     this.indexArr.splice(i, 1);
                     i--
                 }
             }
-        }
+        },
+        // 新增整個問卷加上問題
+        addquestionnaire(){
+            var url = "http://localhost:8081/api/quiz/create";
+            var data = {
+                "questionnaire":{
+                    "title":this.questionnaireName,
+                    "description":this.questionnaireContent,
+                    "published":false,
+                    "startDate":this.questionnaireStartDate,
+                    "endDate":this.questionnaireEndDate
+                },
+                "question_list":this.question_list
+            };
+
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+        },
+        // 搜尋全部問卷
+        searchAllQn(){
+            const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
+            // 要帶入的值
+            const queryParams = new URLSearchParams({
+            title: "",
+            startDate:"",
+            endDate: "",
+            isPublished:false
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.allQuestionnaire = data;
+            this.allQuestionnaire = this.allQuestionnaire.questionnaireList;
+            this.allQuestionnaire = this.allQuestionnaire.reverse();
+            this.lastestId = (this.allQuestionnaire[0].id)+1;
+            console.log(this.allQuestionnaire)
+            console.log(this.lastestId)
+
+            })
+        },
     },
     mounted(){
         // 抓取日期
@@ -94,17 +182,21 @@ export default{
         // 要把值設定給畫面
         const logindate = document.getElementById('logindate')
         const sevendate = document.getElementById('sevendate')
-        logindate.value = this.nowday
-        sevendate.value = this.sevenday
+        this.questionnaireStartDate = this.twoday
+        this.questionnaireEndDate = this.twodayS
+        logindate.value = this.twoday
+        sevendate.value = this.twodayS
+
+        this.searchAllQn();
     },
     computed:{
     // 抓取pinia裡面算出的值今天日期跟七天後
-    ...mapState(day,["nowday","sevenday"])
+    ...mapState(day,["nowday","twoday","sevenday","twodayS"])
     },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
-        console.log(this.indexArr)
-        console.log(this.indexArr.length)
+        // console.log(this.indexArr)
+        // console.log(this.indexArr.length)
     }
 }
 </script>
@@ -124,15 +216,16 @@ export default{
             <div v-if="page==1" class="questionTitle">
                 <div class="titleContent">
                     <label for="">問卷名稱:</label>
-                    <input type="text"><br>
+                    <input type="text" v-model="this.questionnaireName"><br>
                     <label for="">描述內容:</label>
-                    <input type="text"><br>
+                    <input type="text"  v-model="this.questionnaireContent"><br>
                     <label for="">開始時間:</label>
-                    <input id="logindate" type="date"><br>
+                    <input id="logindate" type="date" v-model="this.questionnaireStartDate"><br>
                     <label for="">結束時間:</label>
-                    <input id="sevendate" type="date">
+                    <input id="sevendate" type="date" v-model="this.questionnaireEndDate"><br>
                 </div>
             </div>
+            <!-- 問卷問題們 -->
             <div v-if="page==2" class="addQuestion">
                 <div  class="addQuestionTop">
                     <label class="labelq" for="">問題:</label>
@@ -163,18 +256,21 @@ export default{
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="item,index in questionArr" >
+                            <tr v-for="item,index in question_list" >
                                 <td ><input type="checkbox" id="checkboxt" :key="index" v-model="indexArr[index]"></td>
-                                <td >{{index+1}}</td>
-                                <td ><a href="#">{{item.question}}</a></td>
-                                <td>{{item.questionkind}}</td>
-                                <td>{{item.mustbechoose}}</td>
+                                <td >{{item.quid}}</td>
+                                <td ><a href="#">{{item.qtitle}}</a></td>
+                                <td>{{item.optionType}}</td>
+                                <td>{{item.necessary? "必填":"選填"}}</td>
                                 <td @click="goedit"><a href="#">編輯</a></td>
                             </tr>
                             <!-- 可以继续添加更多的行 -->
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div v-if="page==2.5" class="checkPage">
+
             </div>
             <!-- 問卷回饋的人 -->
             <div v-if="page==3" class="questionPeople">
@@ -209,9 +305,18 @@ export default{
                 </div>
             </div>
 
-            <div class="bot">
-                <button @click="gotoback" class="chancel buttont" type="button">取消新增</button>
-                <button @click="gotoback" class="send buttont" type="button">確定新增</button>
+            <!-- 底下的按鈕跳轉頁們 -->
+            <div v-show="page==1" class="bot">
+                <button @click="gotoback" class="chancel buttont" type="button">取消</button>
+                <button @click="goQuestion" class="send buttont" type="button">下一步</button>
+            </div>
+            <div v-show="page==2" class="bot">
+                <button @click="goTitle" class="chancel buttont" type="button">上一步</button>
+                <button @click="goCheckPage" class="send buttont" type="button">前往確認頁</button>
+            </div>
+            <div v-show="page==2.5" class="bot">
+                <button @click="goQuestion" class="chancel buttont" type="button">取消新增回編輯</button>
+                <button @click="gotobackAndAdd" class="send buttont" type="button">確定新增</button>
             </div>
         </div>
     </div>
@@ -266,6 +371,17 @@ $maincolor2:rgb(218, 218, 218);
                 }
                 input{
                     margin-top: 5vh;
+                    font-size: 16pt;
+                }
+                button{
+                    width: 100px;
+                    height: 30px;
+                    background-color: rgb(209, 139, 53);
+                    margin-top: 20vh;
+                    margin-left: 10vw;
+                    border: 0;
+                    border-radius: 5px;
+                    color: white;
                     font-size: 16pt;
                 }
             }
@@ -355,6 +471,21 @@ $maincolor2:rgb(218, 218, 218);
                     background-color: rgb(187, 186, 186);
                 }
             }
+            .botBtn{
+                width: 100px;
+                height: 30px;
+                background-color: rgb(209, 139, 53);
+                margin-left: 10vw;
+                margin-top: 5vh;
+                border: 0;
+                border-radius: 5px;
+                color: white;
+                font-size: 16pt;
+            }
+        }
+        .checkPage{
+            width: 90vw;
+            height: 60vh;
         }
         // 問卷回饋的人
         .questionPeople{

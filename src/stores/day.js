@@ -9,6 +9,8 @@ export default defineStore("day",{
     },
     actions:{
         getCurrentDate() {
+
+            // 這是今天日期
             var now = new Date();
             
             var year = now.getFullYear();
@@ -21,12 +23,28 @@ export default defineStore("day",{
             this.nowday = year + '-' + month + '-' + day;
 
 
+            // 這是今天日期加七天
             var futureDate = new Date();
             futureDate.setDate(now.getDate() + 7);
             var futureYear = futureDate.getFullYear();
             var futureMonth = (futureDate.getMonth() + 1).toString().padStart(2, '0');
             var futureDay = futureDate.getDate().toString().padStart(2, '0');
             this.sevenday = futureYear+'-' + futureMonth + '-' + futureDay;
+
+            // 這是今天加兩天
+            var twoDate = new Date();
+            twoDate.setDate(now.getDate() + 2);
+            var twoDateYear = twoDate.getFullYear();
+            var twoDateMonth = (twoDate.getMonth() + 1).toString().padStart(2, '0');
+            var twoDateDay = twoDate.getDate().toString().padStart(2, '0');
+            this.twoday = twoDateYear+'-' + twoDateMonth + '-' + twoDateDay;
+
+            var twoDateS = new Date();
+            twoDateS.setDate(now.getDate() + 9);
+            var twoDateYearS = twoDateS.getFullYear();
+            var twoDateMonthS = (twoDateS.getMonth() + 1).toString().padStart(2, '0');
+            var twoDateDayS = twoDateS.getDate().toString().padStart(2, '0');
+            this.twodayS = twoDateYearS+'-' + twoDateMonthS + '-' + twoDateDayS;
         },
     }
 })
