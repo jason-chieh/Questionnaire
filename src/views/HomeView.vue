@@ -20,6 +20,42 @@ export default{
     gotovote(){
       this.$router.push("/vote")
     },
+    // 後端抓取問卷全部資料
+    searchAllQn(){
+        const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
+        // 要帶入的值
+        const queryParams = new URLSearchParams({
+        title: "",
+        start_Date: null,
+        end_Date: null,
+        });
+
+        // 將查詢字串附加到 URL
+        const urlWithParams = `${url}?${queryParams}`;
+
+        fetch(urlWithParams, {
+        method: "GET", 
+        headers: new Headers({
+            "Accept":"application/json",
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin":"*"
+        }),
+        })
+        // .then((res) => res.json())
+        // .then((response) => 
+        // console.log(response)
+        // );
+        .then(response => {
+        // 將API回應轉換為JSON格式
+        return response.json();
+        })
+        .then(data => {
+        // 將API回應的JSON數據設置到組件的responseData數據屬性中
+        this.allData1 = data;
+        this.allData1 = this.allData1.questionnaireList;
+        console.log(this.allData1)
+        })
+    },
     // 執行方法獲得日期
     ...mapActions(day,["getCurrentDate"]),
   },

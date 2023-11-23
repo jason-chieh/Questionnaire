@@ -1,90 +1,92 @@
 <script>
+import { sassNull } from 'sass';
+
 export default{
-        // <!-- -----------------------------------------------------方法2 -->
     data(){
         return{
-            pages: Array.from({ length: 10 }, (_, i) => i + 1),
-            content: ''
+            allData:{},
         }
     },
     methods: {
-                showContent(pageNumber) {
-                    this.content = `内容：页面 ${pageNumber}`;
-                    console.log(this.pages)
-                }
-    },
+        addquestionnaire(){
+            var url = "http://localhost:8081/api/quiz/create";
+            var data = {
+                "questionnaire":{
+                    "title":"test12311",
+                    "description":"test1111",
+                    "published":false,
+                    "startDate":"2023-11-20",
+                    "endDate":"2023-11-30"
+                },
+                "question_list":[
+                    {
+                    "quid":12,
+                    "qtitle":"abc",
+                    "optionType":"multi",
+                    "necessary":"true",
+                    "option":"Q;T;R"
+                    }
+                ]
+            };
 
-    // <!-- -----------------------------------------------------方法1 -->
-    mounted(){
-        var tabsContainer = document.getElementById('tabs-container');
-        var contentContainer = document.getElementById('content');
-
-
-        // 创建10个页面标签
-        for (var i = 1; i <= 10; i++) {
-            var tab = document.createElement('button');
-            tab.className = 'tab';
-            tab.textContent = i;
-            tab.dataset.pageNumber = i;
-            tab.addEventListener('click', function() {
-                var pageNumber = this.dataset.pageNumber;
-                contentContainer.textContent = '内容：页面 ' + pageNumber;
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+        },
+        search(){
+            const url = 'http://localhost:8081/api/quiz/search1';
+            // 要帶入的值
+            const queryParams = new URLSearchParams({
+            title: "t",
+            start_Date: 2023-11-22,
+            end_Date: 2023-11-30,
             });
-            tabsContainer.appendChild(tab);
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
         }
+                        
+    },
+    mounted(){
+    },
+    updated(){
     }
 }
 </script>
 
 <template>
-    <!-- -----------------------------------------------------方法1 -->
+    <div class="d">
+        <h1 id="hh">你好</h1>
+        <input id="inp" type="text">
+        <button type="submit" @click="addquestionnaire" id="btn">按我新增問卷到資料庫</button>
+        <button type="submit" @click="search" id="btn">按我查詢資料庫</button>
 
-<div class="tabs" id="tabs-container"></div>
-    <div id="content"></div>
-
-
-<!-- -----------------------------------------------------方法2 -->
-    <div id="app">
-        <div class="tabs1">
-            <div class="tab1" v-for="pageNumber in pages" :key="pageNumber" @click="showContent(pageNumber)">
-                {{ pageNumber }}
-            </div>
-        </div>
-        <div id="content">
-            {{ content }}
-        </div>
     </div>
 </template>
 
 <style lang="scss" scoped>
 
-// 方法1
 
-  .tabs {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-            background-color: pink;
-            
-        }
-
-        .tab {
-            margin: 0 10px;
-            cursor: pointer;
-        }
-
-
-// 方法2
-
-        .tabs1 {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .tab1 {
-            margin: 0 10px;
-            cursor: pointer;
-        }
-
+.d{
+    width: 200px;
+    height: 200px;
+    background-color: pink;
+}
 </style>

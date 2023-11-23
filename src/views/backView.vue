@@ -4,7 +4,8 @@ import day from '../stores/day'
 export default{
     data(){
         return{
-        arr2:[1,2],
+            questionnaireArr:[1,2],
+            allData1:[]
         }
     },
     components:{
@@ -20,6 +21,45 @@ export default{
         gotoaddQuestion(){
         this.$router.push("/addQuestion")
         },
+        // 後端抓取問卷全部資料
+        searchAllQn(){
+            const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
+            // 要帶入的值
+            const queryParams = new URLSearchParams({
+            title: "",
+            start_Date: null,
+            end_Date: null,
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            // .then((res) => res.json())
+            // .then((response) => 
+            // console.log(response)
+            // );
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.allData1 = data;
+            this.allData1 = this.allData1.questionnaireList;
+            console.log(this.allData1)
+            })
+        },
+        processData(x){
+            this.allData1 = x;
+        },
         // 執行方法獲得日期
         ...mapActions(day,["getCurrentDate"]),
     },
@@ -31,6 +71,14 @@ export default{
         const sevendate = document.getElementById('sevendate')
         logindate.value = this.nowday
         sevendate.value = this.sevenday
+
+        // //自動抓取全部問卷
+        this.searchAllQn();
+        // console.log(this.allData1)
+
+    },
+    updated(){
+        
     },
     computed:{
         // 抓取pinia裡面算出的值今天日期跟七天後
@@ -38,6 +86,8 @@ export default{
     }
 }
 </script>
+
+
 
 <template>
     <div  class="bg">  
@@ -76,13 +126,13 @@ export default{
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item, index in arr2">
+                        <tr v-for="item, index in allData1">
                             <td ><input type="checkbox" :key="index" ></td>
-                            <td >{{item}}</td>
-                            <td :key="index" @click="gotovote(index)"><a href="#">問卷標題1</a></td>
-                            <td>已完成</td>
-                            <td>2023-10-26 10:00 AM</td>
-                            <td>2023-10-30 10:00 AM</td>
+                            <td >{{item.id}}</td>
+                            <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}</a></td>
+                            <td>{{item.published ? "已發布":"未發布"}}</td>
+                            <td>{{item.startDate}}</td>
+                            <td>{{item.endDate}}</td>
                             <td :key="index" @click="gocal(index)"><a href="#">統計連結</a></td>
                         </tr>
                         <!-- 可以继续添加更多的行 -->

@@ -21,6 +21,12 @@ export default{
         }
     },
     methods:{
+        goCalCircle(){
+            this.page=4
+        },
+        goPeople(){
+            this.page=3
+        },
         goQuestion(){
             this.page=2
         },
@@ -110,6 +116,8 @@ export default{
             <div class="top">
                 <button @click="goTitle" type="button">問卷題目</button>
                 <button @click="goQuestion" type="button">問卷內容</button>
+                <button @click="goPeople" type="button">問卷回饋</button>
+                <button @click="goCalCircle" type="button">統計圖表</button>
             </div>
 
             <!-- 問卷標題跟問卷內容 -->
@@ -167,6 +175,12 @@ export default{
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <!-- 問卷回饋的人 -->
+            <div v-if="page==3" class="questionPeople">
+            </div>
+            <!-- 統計圖表 -->
+            <div v-if="page==4" class="circleCal">
             </div>
 
 
@@ -240,6 +254,7 @@ $maincolor2:rgb(218, 218, 218);
                 }
             }
         }
+        // 新增問題標題
         .questionTitle{
             width: 90vw;
             height: 60vh;
@@ -255,6 +270,7 @@ $maincolor2:rgb(218, 218, 218);
                 }
             }
         }
+        // 新增問題
         .addQuestion{
             width: 90vw;
             height: 60vh;
@@ -339,6 +355,18 @@ $maincolor2:rgb(218, 218, 218);
                     background-color: rgb(187, 186, 186);
                 }
             }
+        }
+        // 問卷回饋的人
+        .questionPeople{
+            width: 90vw;
+            height: 60vh;
+            background-color: pink;
+        }
+        // 統計圖表
+        .circleCal{
+            width: 90vw;
+            height: 60vh;
+            background-color: pink;
         }
         .addQuestionEdit{
             position: absolute;
