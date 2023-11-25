@@ -7,34 +7,43 @@ export default{
         return{
             // 拿到全部問卷
             allQuestionnaire:[],
+            //拿到最新問卷的id
             lastestId:1,
             // 題目標題跟題目製作畫面切換
             page:1,
             editPage:1,
-            selectMode:1,
 
             // 問卷的陣列
             question_list:[],
             // 選擇問題的陣列索引
             indexArr:[],
-            // 問卷的內容
+
+            // 問卷小問題的內容
             question:"",
-            quNum:1,
+            // quNum:1,
             mustbechoose:"",
             questionanswer:"",
+            selectMode:"",
             //問卷的總標題+描述內容+時間
             questionnaireName:"",
             questionnaireContent:"",
             questionnaireStartDate:"",
-            questionnaireEndDate:""
-            // 問卷的問題們
-
+            questionnaireEndDate:"",
+            // 問卷問題的編輯索引直
+            // questionEditKey:0,
+            //編輯裡面的資料
+            editQuestion:"",
+            editQuestionanswer:"",
+            editMustbechoose:"",
+            editType:"",
+            editIndex:0  //單一問題的索引值
 
             
         }
     },
     methods:{
         goCheckPage(){
+            this.createQuestion();
             this.page=2.5
         },
         goCalCircle(){
@@ -44,6 +53,7 @@ export default{
             this.page=3
         },
         goQuestion(){
+            this.delCheckParamQuestion();
             this.page=2
         },
         goTitle(){
@@ -58,53 +68,54 @@ export default{
             this.$router.push("/backView")
 
         },
-        goedit(){
+        //前往單一問題的編輯頁
+        goedit(index){
             this.editPage=2
+            
+            this.editIndex = index
+            this.editQuestion=this.question_list[index].qtitle
+            this.editQuestionanswer=this.question_list[index].option
+            this.editMustbechoose=this.question_list[index].necessary
+            this.editType=this.question_list[index].optionType
+
         },
         goeditBack(){
             this.editPage=1
+        },
+        // 確定編輯後返回多個小問題
+        goeditBackAndUpdate(){
+            this.editPage=1
+
+            let index = this.editIndex
+            this.question_list[index].qtitle=this.editQuestion
+            this.question_list[index].option= this.editQuestionanswer
+            this.question_list[index].necessary=this.editMustbechoose
+            this.question_list[index].optionType=this.editType
+
         },
         // pinia抓取時間
         ...mapActions(day,["getCurrentDate"]),
         // 新增問題
         addQuestion(){
-            let mustbechoosechiense = "";
-            let kind ="";
-            // 判斷是否為必填
-            if(this.mustbechoose){
-                mustbechoosechiense = "必填"
-            }else{
-                mustbechoosechiense = "選填"
-            }
-            // 判斷選擇的種類
-            if(this.selectMode==1){
-                kind = "文字輸入"
-            }else if(this.selectMode==2){
-                kind = "單選題"
-            }else{
-                kind = "多選題"
-            }
-
             let questionObj={
-                quid:this.quNum,
+                quid:this.question_list.length+1,
                 qnid:this.lastestId,
                 qtitle:this.question,
-                optionType:kind,
+                optionType:this.selectMode.length==0 ?"文字回答":this.selectMode,
                 necessary:this.mustbechoose,
-                option:this.questionanswer
+                option:this.questionanswer.length==0 ?"打字回答~":this.questionanswer,
             }
-
+            console.log(questionObj.option)
             this.question_list.push(questionObj)
             this.indexArr.push(false)
             this.question = ""
             this.mustbechoose = ""
             this.questionanswer = ""
-            this.quNum++
-            
-            
+             
         },
-        // 刪除問題
+        // 刪除問題們
         delQuestion(){
+            // 把問卷checkbox索引直放到陣列 並把key值抓出來判斷然後刪掉問卷陣列的問題
             for (let i = 0; i < this.indexArr.length; i++) {
                 if (this.indexArr[i] == true) {
                     this.question_list.splice(i, 1);
@@ -112,6 +123,15 @@ export default{
                     i--
                 }
             }
+
+
+            // 重新判斷問題索引值
+            for (let i = 0; i < this.question_list.length; i++) {
+                if(this.question_list[i].quid !=i+1){
+                    this.question_list[i].quid=i+1
+                }
+            }
+        
         },
         // 新增整個問卷加上問題
         addquestionnaire(){
@@ -171,10 +191,80 @@ export default{
             this.allQuestionnaire = this.allQuestionnaire.reverse();
             this.lastestId = (this.allQuestionnaire[0].id)+1;
             console.log(this.allQuestionnaire)
-            console.log(this.lastestId)
 
             })
         },
+        //生成確認問題
+        createQuestion(){
+        
+            // 將問題和選項生成到此元素中
+            const createQuestionPlace = document.getElementById('createQuestionPlace');
+
+            // 遍歷問題列表
+            this.question_list.forEach(question => {
+            if(question.option=="null"){
+
+            }
+            // 如果問題標題不為空
+            if (question.qtitle.trim() !== '') {
+                // 創建問題的容器 div
+                const questionDiv = document.createElement('div');
+
+                // 添加問題標題
+                const questionTitle = document.createElement('p');
+                questionTitle.textContent =question.quid+"."+ question.qtitle;
+                questionDiv.appendChild(questionTitle);
+
+                // 拆分選項（假設選項以分號分隔）
+                const options = question.option.split(';');
+                // 遍歷選項，創建並添加選項到問題容器中
+                options.forEach(option => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                if(question.optionType=="單選"){
+                    input.setAttribute('type', 'radio'); //取決於 optionType
+                    label.appendChild(document.createTextNode(option));
+                }
+                if(question.optionType=="多選"){
+                    input.setAttribute('type', 'checkbox'); // 取決於 optionType
+                    label.appendChild(document.createTextNode(option));
+                }
+                if(question.optionType=="文字回答"){
+                    input.setAttribute('type', 'textarea'); // 取決於 optionType
+                    input.setAttribute('style', 'width: 300px; height: 50px;resize: none;');
+                    input.setAttribute('rows', '5');
+                    input.setAttribute('cols', '33');
+                }
+
+                // // 假設值為選項內容
+                // input.setAttribute('value', option);
+
+                label.appendChild(input);
+                // label.appendChild(document.createTextNode(option));
+                questionDiv.appendChild(label);
+                });
+
+                // 將問題容器添加到整體容器中
+                createQuestionPlace.appendChild(questionDiv);
+            }
+            });
+
+        },
+        // 刪除確認頁跳出的確認問題
+        delCheckParamQuestion(){
+            const createQuestionPlace = document.getElementById('createQuestionPlace');
+
+            // 檢查是否找到了該 div 元素
+            if (createQuestionPlace !== null) {
+            // 移除所有子元素
+            while (createQuestionPlace.firstChild) {
+                createQuestionPlace.removeChild(createQuestionPlace.firstChild);
+            }
+            } else {
+            console.error('找不到指定的 div 元素');
+            }
+
+        }
     },
     mounted(){
         // 抓取日期
@@ -230,11 +320,14 @@ export default{
                 <div  class="addQuestionTop">
                     <label class="labelq" for="">問題:</label>
                     <input class="inputq"  type="text" v-model="question">
-                    <select class="selectq" name="" id="" v-model="selectMode" >
-                        <option id="one" value="1" >文字回答</option>
-                        <option id="two" value="2">單選</option>
-                        <option id="three" value="3">多選</option>
+
+                    <select id="selectqu" class="selectq"  v-model="selectMode" >
+                        <option value="">請選擇</option>
+                        <option id="one" value="文字回答" >文字回答</option>
+                        <option id="two" value="單選">單選</option>
+                        <option id="three" value="多選">多選</option>
                     </select>
+
                     <input class="checkboxq" type="checkbox" v-model="mustbechoose" value="必填">
                     <label  for="">必填</label><br>
                     <label class="labelq" for="">選擇答案:</label>
@@ -262,15 +355,29 @@ export default{
                                 <td ><a href="#">{{item.qtitle}}</a></td>
                                 <td>{{item.optionType}}</td>
                                 <td>{{item.necessary? "必填":"選填"}}</td>
-                                <td @click="goedit"><a href="#">編輯</a></td>
+                                <td @click="goedit(index)"><a href="#" :key="index" >編輯</a></td>
                             </tr>
                             <!-- 可以继续添加更多的行 -->
                         </tbody>
                     </table>
                 </div>
             </div>
-            <div v-if="page==2.5" class="checkPage">
+            <!-- 確認頁面表 -->
+            <div v-show="page==2.5" class="checkPage">
+                <h1>{{this.questionnaireName}}</h1>
+                <p style="font-weight: bold;">內容:{{this.questionnaireContent}}</p>
+                <label for="">姓名:</label>
+                <input type="text"><br>
+                <label for="">手機:</label>
+                <input type="text"><br>
+                <label for="">信箱:</label>
+                <input type="text"><br>
+                <label for="">年齡:</label>
+                <input type="text">
+                <div id="createQuestionPlace" class="questionPlace">
+                        
 
+                </div>
             </div>
             <!-- 問卷回饋的人 -->
             <div v-if="page==3" class="questionPeople">
@@ -279,28 +386,27 @@ export default{
             <div v-if="page==4" class="circleCal">
             </div>
 
-
             <!-- 編輯畫面 -->
             <div v-if="editPage==2" class="addQuestionEdit">
                 <div class="editArea">
                     <h1 >問題編輯</h1>
                     <label for="">問題:</label>
-                    <input type="text"><br>
+                    <input type="text" v-model="editQuestion" ><br>
                     <label for="">答案:</label>
-                    <input type="text">
+                    <input type="text" v-model="editQuestionanswer">
 
                     <div class="editAreaBot">
-                        <select  name="" id=""  >
-                            <option  value="1" >文字回答</option>
-                            <option  value="2">單選</option>
-                            <option  value="3">多選</option>
+                        <select  name="" id=""  v-model="editType" >
+                            <option  value="文字回答" >文字回答</option>
+                            <option  value="單選">單選</option>
+                            <option  value="多選">多選</option>
                         </select>
-                    <input  type="checkbox" value="true">
+                    <input  type="checkbox" value="true" v-model="editMustbechoose">
                     <label  for="">必填</label><br>
                     </div>
                     <div class="editAreaBtn">
                         <button @click="goeditBack" type="button">取消</button>
-                        <button type="button">確定修改</button>
+                        <button @click="goeditBackAndUpdate" type="button">確定修改</button>
                     </div>
                 </div>
             </div>
@@ -317,6 +423,7 @@ export default{
             <div v-show="page==2.5" class="bot">
                 <button @click="goQuestion" class="chancel buttont" type="button">取消新增回編輯</button>
                 <button @click="gotobackAndAdd" class="send buttont" type="button">確定新增</button>
+                <button @click="gotobackAndAdd" class="send buttont" type="button">新增並馬上發布</button>
             </div>
         </div>
     </div>
@@ -484,8 +591,27 @@ $maincolor2:rgb(218, 218, 218);
             }
         }
         .checkPage{
-            width: 90vw;
+            width: 80vw;
             height: 60vh;
+            padding-left: 10vw;
+            overflow: auto;
+            background-color: white;
+            h1{
+                width: 50vw;
+            }
+            p{
+                width: 50vw;
+            }
+            input{
+                font-size: 16pt;
+                margin-bottom: 2vh;
+            }
+            .questionPlace{
+                width: 70vw;
+                border: 1px solid black;
+                padding: 2% 2%;
+                margin-bottom: 5vh;
+            }
         }
         // 問卷回饋的人
         .questionPeople{

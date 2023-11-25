@@ -7,12 +7,16 @@ export default{
             // 問卷列表全部
             allQuestionnaire:[],
             // 問卷分頁
-            perpage: 6, //一頁的資料數
+            perpage: 10, //一頁的資料數
             currentPage: 1,
              //搜尋標題
             searchText:"",
             searchStartDate: "",
             searchEndDate:"",
+            //點選後臺問卷的索引直陣列
+            indexArr: []
+  
+
         
         }
     },
@@ -71,12 +75,114 @@ export default{
         }
         this.currentPage = page
         },
+        // 刪除列表業的問卷 
+        deleQn() {
+            let stopDel=false;
+            // 後端需要的qnidList
+            var data = [
+                
+            ];
+
+            var data1 = [
+                
+            ];
+
+            // 判斷我要去刪掉陣列問卷的哪幾個
+            for (let i = 0; i < this.indexArr.length; i++) {
+                let indexNum = 0;
+                let bigNum =this.indexArr[i].currPage
+                let  smallNum =  this.indexArr[i].index
+                
+                indexNum = this.perpage*(bigNum-1)+smallNum
+                data1.push(indexNum)
+                data.push(this.allQuestionnaire[indexNum].id)
+            }
+            console.log(data1);
+            //判斷這幾個裡面有沒有已經出版在進行中的資料
+            for(let w = 0; w<data1.length ; w++){
+                const SSdate = new Date(this.allQuestionnaire[data1[w]].startDate);
+                const NNdate = new Date(this.nowday);
+                if(this.allQuestionnaire[data1[w]].published == true && NNdate>=SSdate){
+                    stopDel=true;
+                    alert("你刪除的問卷當中有包含已開始的問卷所以禁止刪除");
+                    return stopDel;
+                }
+            };
+
+            
+            // 抓到當中有出版的直接終止掉----------------
+            if(stopDel){
+                alert("當中包含已出版且已經開始的問卷")
+                return 
+            }
+            console.log("==============================")
+
+            //把前端的資料刪掉
+            for(let i = 0; i < this.allQuestionnaire.length; i++){
+                    for(let k = 0; k < data.length; k++){
+                    if(this.allQuestionnaire[i].id==data[k]){
+                        this.allQuestionnaire.splice(i,1)
+                    }
+                    
+                }
+            }
+
+            var url = "http://localhost:8081/api/quiz/deleteQuestionnaire";
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+            this.indexArr=[];
+
+
+        },
+        // 處理問卷文字狀態  
+        getPublishedStatus(published,startDate,endDate) {
+            if(!published){
+                return "未發布!!";
+            }
+            
+            const SSdate = new Date(startDate);
+            const EEdate = new Date(endDate);
+            const NNdate = new Date(this.nowday);
+            if (NNdate < SSdate) {
+                return "尚未開始";
+            } else if (NNdate > EEdate) {
+                return "已結束";
+            } else {
+                return "進行中";
+            }
+        },
+        addNumInIndexArr(index){
+            let obj ={
+                currPage:this.currentPage,
+                index:index
+            }
+            this.indexArr.push(obj)
+
+            this.indexArr =  this.indexArr.filter(function(item, index, self) {
+                let slicedArr = self.slice(0, index).concat(self.slice(index + 1));
+                
+                    return !slicedArr.some(function(obj) {
+                        return obj.currPage === item.currPage && obj.index === item.index;
+                    });
+            });
+
+
+
+        },
         // 執行方法獲得日期
         ...mapActions(day,["getCurrentDate"]),
     },
     mounted(){
         // // 抓取日期
-        // this.getCurrentDate()
+        this.getCurrentDate()
         // // 要把值設定給畫面
         // const logindate = document.getElementById('logindate')
         // const sevendate = document.getElementById('sevendate')
@@ -89,7 +195,10 @@ export default{
 
     },
     updated(){
+        // console.log(this.indexArr)
+        // console.log(this.currentPage)
     },
+
     computed:{
         // 抓取pinia裡面算出的值今天日期跟七天後
         ...mapState(day,["nowday","sevenday"])
@@ -135,7 +244,7 @@ export default{
         </div>
         <div class="addDelArea">
             <button @click="gotoaddQuestion" class="add bb" type="button">add</button>
-            <button class="delete bb" type="button">delete</button>
+            <button @click="deleQn" class="delete bb" type="button">delete</button>
         </div>
         <div class="showBlock">
                     <table>
@@ -151,11 +260,11 @@ export default{
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
-                            <td ><input type="checkbox" :key="index" ></td>
+                        <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)"  >
+                            <td ><input type="checkbox"  v-model="item.checked" @click="addNumInIndexArr(index)" ></td>
                             <td >{{item.id}}</td>
                             <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}</a></td>
-                            <td >{{item.published? "已發布":"未發布"}}</td>
+                            <td >{{getPublishedStatus(item.published, item.startDate,item.endDate )}}</td>
                             <td>{{item.startDate}}</td>
                             <td>{{item.endDate}}</td>
                             <td :key="index" @click="gocal(index)"><a href="#">統計連結</a></td>
@@ -168,7 +277,7 @@ export default{
             <ul class="pagination">
                 <li class="page-item" @click.prevent="setPage(currentPage-1)">
                     <a class="page-link" href="#" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
+                    <span  aria-hidden="true">&laquo;</span>
                     </a>
                 </li>
                 <li class="page-item" :class="{'active': (currentPage === (n))}"
@@ -177,7 +286,7 @@ export default{
                 </li>
                 <li class="page-item" @click.prevent="setPage(currentPage+1)">
                     <a class="page-link" href="#" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
+                    <span  aria-hidden="true">&raquo;</span>
                     </a>
                 </li>
             </ul>

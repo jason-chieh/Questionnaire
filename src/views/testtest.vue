@@ -4,7 +4,12 @@ import { sassNull } from 'sass';
 export default{
     data(){
         return{
-            allData:{},
+            paginatedCheckboxes:[],
+            allQuestionnaire: [], // 你的所有问卷数据
+            perpage: 10, // 每页数据量
+            currentPage: 0, // 当前页码，从 0 开始
+            checkboxStates: [] // 存储每个页面的复选框状态的数组
+            
         }
     },
     methods: {
@@ -61,10 +66,99 @@ export default{
             .then((res) => res.json())
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
+        },
+        createQ(){
+            const questions = [
+            { "quid": 1, "qnid": 80, "qtitle": "星巴克", "optionType": "單選", "necessary": "", "option": "12;032;13" },
+            { "quid": 2, "qnid": 80, "qtitle": "露易莎", "optionType": "多選", "necessary": "", "option": "21;3;21" },
+            { "quid": 3, "qnid": 80, "qtitle": "cama", "optionType": "文字", "necessary": "", "option": "" },
+            { "quid": 4, "qnid": 80, "qtitle": "賓恩樂", "optionType": "單選", "necessary": "", "option": "21;3;2;1" },
+            ];
+
+            // 將問題和選項生成到此元素中
+            const container = document.getElementById('question-container');
+
+            // 遍歷問題列表
+            questions.forEach(question => {
+            // 如果問題標題不為空
+            if (question.qtitle.trim() !== '') {
+                // 創建問題的容器 div
+                const questionDiv = document.createElement('div');
+
+                // 添加問題標題
+                const questionTitle = document.createElement('p');
+                questionTitle.textContent = question.qtitle;
+                questionDiv.appendChild(questionTitle);
+
+                // 拆分選項（假設選項以分號分隔）
+                const options = question.option.split(';');
+                // 遍歷選項，創建並添加選項到問題容器中
+                options.forEach(option => {
+                const label = document.createElement('label');
+                const input = document.createElement('input');
+                if(question.optionType=="單選"){
+                    input.setAttribute('type', 'radio'); // 或 'radio'，取決於 optionType
+                }
+                if(question.optionType=="多選"){
+                    input.setAttribute('type', 'checkbox'); // 或 'radio'，取決於 optionType
+                }
+                if(question.optionType=="文字"){
+                    input.setAttribute('type', 'text'); // 或 'radio'，取決於 optionType
+                }
+
+                // 假設值為選項內容
+                input.setAttribute('value', option);
+                label.appendChild(input);
+                label.appendChild(document.createTextNode(option));
+                questionDiv.appendChild(label);
+                });
+
+                // 將問題容器添加到整體容器中
+                container.appendChild(questionDiv);
+            }
+            });
+
+
+        },
+        // 前往後端刪除資料!
+        goBackDelQn(){
+            var url = "http://localhost:8081/api/quiz/deleteQuestionnaire";
+            var data = [
+                80,81
+            ];
+
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+        },
+
+        // 刪除子div子元素
+        delete231(){
+            const question = document.getElementById('question-container');
+
+            // 檢查是否找到了該 div 元素
+            if (question !== null) {
+            // 移除所有子元素
+            while (question.firstChild) {
+                question.removeChild(question.firstChild);
+            }
+            } else {
+            console.error('找不到指定的 div 元素');
+}
         }
                         
     },
     mounted(){
+    },
+    computed: {
+
     },
     updated(){
     }
@@ -77,7 +171,15 @@ export default{
         <input id="inp" type="text">
         <button type="submit" @click="addquestionnaire" id="btn">按我新增問卷到資料庫</button>
         <button type="submit" @click="search" id="btn">按我查詢資料庫</button>
+        <button type="submit" @click="createQ" id="btn">新增問題</button>
+        <button type="submit" @click="delete231" id="btn">新增問題</button>
+        <button type="submit" @click="goBackDelQn" id="btn">後臺山問卷</button>
     </div>
+    <div id="question-container" class="question-cont">
+    </div>
+
+
+    
 
     
 </template>
@@ -91,3 +193,12 @@ export default{
     background-color: pink;
 }
 </style>
+
+
+
+
+
+
+
+
+

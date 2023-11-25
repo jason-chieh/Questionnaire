@@ -7,7 +7,7 @@ export default{
         // 問卷總表
         allQuestionnaire:[],
         //問卷分頁
-        perpage: 6, //一頁的資料數
+        perpage: 10, //一頁的資料數
         currentPage: 1,
         //搜尋標題
         searchText:"",
