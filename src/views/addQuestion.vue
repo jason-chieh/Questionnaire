@@ -9,7 +9,7 @@ export default{
             allQuestionnaire:[],
             allQnQu:[],
             //拿到最新問卷的id
-            lastestId:1,
+            lastestId:0,
             // 題目標題跟題目製作畫面切換
             page:1,
             editPage:1,
@@ -134,6 +134,9 @@ export default{
 
         // 前端新增問題們
         addQuestion(){
+            if(this.allQnQu.length!=0){
+                this.lastestId--
+            }
             let questionObj={
                 quid:this.question_list.length+1,
                 qnid:this.lastestId,
@@ -148,7 +151,6 @@ export default{
             this.question = ""
             this.mustbechoose = ""
             this.questionanswer = ""
-             
         },
         // 前端刪除問題們
         delQuestion(){
@@ -350,7 +352,8 @@ export default{
         logindate.value = this.twoday
         sevendate.value = this.twodayS
 
-
+        // pinya收尋後端問卷    結束的時候也要在收尋一次做更新!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        this.searchAllQna();
 
         //去後端抓取問卷資料
         this.searchAllQn();
@@ -359,11 +362,14 @@ export default{
         //抓取要編輯的問卷代碼   要編輯的話才會跑進來喔~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         let x = this.geteditQuestionnaire();
         this.updateNum = x;
+        
         if(x!=-1){
+            // console.log(this.lastestId)
             const arr = this.allQuestionnaireA.quizVoList
             this.allQnQu = arr
-            console.log(this.allQnQu)
-            for(let i = 0 ; i< this.allQnQu.length ; i++){
+            var longlong =this.allQnQu.length
+            // console.log(this.allQnQu)
+            for(let i = 0 ; i< longlong ; i++){
                 if(this.allQnQu[i].questionnaire.id==x){
                     this.questionnaireName = this.allQnQu[i].questionnaire.title;
                     this.questionnaireContent = this.allQnQu[i].questionnaire.description;
@@ -381,10 +387,14 @@ export default{
 
         
     },
+    unmounted(){
+        // pinya收尋後端問卷
+        this.searchAllQna();
+    },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
         // console.log(this.indexArr)
-        // console.log(this.indexArr.length)
+        // console.log(this.question_list)
     }
 }
 </script>

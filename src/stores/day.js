@@ -3,16 +3,23 @@ import { defineStore } from 'pinia';
 
 export default defineStore("day",{
     state:()=>({
+        // 所有的問卷包括小問題
         allQuestionnaireA:[],
-        //
-        editQuestionnaire:0
+        //全域變數告訴新增問題說這次是要編輯
+        editQuestionnaire:0,
+        //全域變數告訴投票頁面是邸幾個問卷
+        tellVoteWhichOne:0,
+        // 從pinya拿到home給我們的問卷標題
+        fromPinyaQn:[],
+        //從方法拿到的問卷小問題們
+        questionArr:[],
         
     }),
     getters:{
 
     },
     actions:{
-        //抓取當天日期
+        //抓取當天日期--------------------------------------
         getCurrentDate() {
 
             // 這是今天日期
@@ -52,7 +59,7 @@ export default defineStore("day",{
             this.twodayS = twoDateYearS+'-' + twoDateMonthS + '-' + twoDateDayS;
         },
 
-        //把後端所有問卷包括小問題抓出來
+        //把後端所有問卷包括小問題抓出來--------------------
         searchAllQna(){
             var arr =[];
             const url = 'http://localhost:8081/api/quiz/search1';
@@ -84,14 +91,112 @@ export default defineStore("day",{
                 this.allQuestionnaireA=data
             })
         },
+        // 後端抓取問卷   已出版的
+        searchAllQnIsPublished(){
+                const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
+                // 要帶入的值
+    
+                const queryParams = new URLSearchParams({
+                title: "",
+                startDate:"2000-01-01",
+                endDate:"2099-01-01",
+                isPublished:true
+                });
+    
+                // 將查詢字串附加到 URL
+                const urlWithParams = `${url}?${queryParams}`;
+    
+                fetch(urlWithParams, {
+                method: "GET", 
+                headers: new Headers({
+                    "Accept":"application/json",
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin":"*"
+                }),
+                })
+                .then(response => {
+                // 將API回應轉換為JSON格式
+                return response.json();
+                })
+                .then(data => {
+                // 將API回應的JSON數據設置到組件的responseData數據屬性中
+                this.isPublishedQnArr = data;
+                })
+        },
+        //去抓看到底是哪張問卷要投票生成
+        prepareVote(){
+            const a =this.getTellVoteWhichOne()
+            const arr = this.isPublishedQnArr.questionnaireList
+            for(let i=0 ; i< arr.length;i++){
+                if(arr[i].id==a){
+                    this.fromPinyaQn=arr[i]
+                    console.log(this.fromPinyaQn)
+                }
+            }
 
+            const url = 'http://localhost:8081/api/quiz/searchQuestionList';
+            // 要帶入的值
+
+            const queryParams = new URLSearchParams({
+                qnid:a
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.questionArr = data;
+            this.questionArr = this.questionArr.questionList
+            console.log(this.questionArr)
+            })
+
+        },
+
+
+// ===========================================================================get and set===================================
+
+        //告訴新增問題說這次是要編輯-------------------------
         geteditQuestionnaire(){
-            console.log(this.editQuestionnaire)
             return this.editQuestionnaire
         },
         seteditQuestionnaire(num){
             this.editQuestionnaire = num ;
-        }
+        },
+        //告訴投票頁面是哪個問卷要create------------------------
+        getTellVoteWhichOne(){
+            return this.tellVoteWhichOne
+        },
+        setTellVoteWhichOne(num){
+            this.tellVoteWhichOne = num ;
+        },
+
+        //告訴投票頁面是哪個問卷標題
+        getfromPinyaQn(){
+            return this.fromPinyaQn
+        },
+        setfromPinyaQn(num){
+            this.fromPinyaQn = num ;
+        },
+        //告訴投票頁面是哪個問卷標題
+        getquestionArr(){
+            return this.questionArr
+        },
+        setquestionArr(num){
+            this.questionArr = num ;
+        },
 
 
     }

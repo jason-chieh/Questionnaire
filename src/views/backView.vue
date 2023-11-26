@@ -194,7 +194,7 @@ export default{
 
         },
         // 執行方法獲得日期 還有 設定編輯問卷的代碼
-        ...mapActions(day,["getCurrentDate","seteditQuestionnaire"]),
+        ...mapActions(day,["getCurrentDate","seteditQuestionnaire","searchAllQna"]),
     },
     mounted(){
         // // 抓取日期
@@ -204,11 +204,17 @@ export default{
         // const sevendate = document.getElementById('sevendate')
         // logindate.value = this.nowday
         // sevendate.value = this.sevenday
-
+        
+        // pinya收尋後端問卷
+        this.searchAllQna();
 
         // //自動抓取全部問卷
         this.searchAllQn();
 
+    },
+    unmounted(){
+        // pinya收尋後端問卷
+        this.searchAllQna();
     },
     updated(){
         // console.log(this.indexArr)

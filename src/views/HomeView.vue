@@ -22,10 +22,23 @@ export default{
         gocal(){
         this.$router.push("/CalView")
         },
-        gotovote(){
+        gotovote(index){
+        let key = this.perpage*(this.currentPage-1)+index
+        this.setTellVoteWhichOne(this.allQuestionnaire[key].id);
+
+        const stDay =new Date(this.allQuestionnaire[key].startDate)
+        const edDay =new Date(this.allQuestionnaire[key].endDate)
+        const nDay  =new Date(this.nowday)
+        if(nDay>edDay || nDay<stDay){
+            alert("問卷已經結束或是還沒開始喔")
+            return
+        }
+        console.log("123456789")
+
+        this.prepareVote();
         this.$router.push("/vote")
         },
-        // 後端抓取問卷全部資料
+        // 後端抓取問卷抓取已出版的
         searchAllQn(){
             const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
             // 要帶入的值
@@ -57,7 +70,7 @@ export default{
             this.allQuestionnaire = data;
             this.allQuestionnaire = this.allQuestionnaire.questionnaireList;
             this.allQuestionnaire = this.allQuestionnaire.reverse();
-            console.log(this.allQuestionnaire)
+            // console.log(this.allQuestionnaire)
             })
         },
         // 設定頁籤
@@ -81,8 +94,8 @@ export default{
             return "進行中";
             
         },
-        // 執行方法獲得日期
-        ...mapActions(day,["getCurrentDate","searchAllQna"]),
+        // pinya執行方法獲得日期
+        ...mapActions(day,["getCurrentDate","searchAllQna","setTellVoteWhichOne","searchAllQnIsPublished","prepareVote"]),
     },
 
     mounted(){
@@ -101,6 +114,9 @@ export default{
 
         //pinya去抓後台資料
         this.searchAllQna();
+
+        //pinya抓已出版的問卷
+        this.searchAllQnIsPublished();
 
 
         },
@@ -163,7 +179,7 @@ export default{
                 <tbody>
                     <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
                         <td >{{item.id}}</td>
-                        <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}1</a></td>
+                        <td ><a :key="index" @click="gotovote(index)" href="#">{{item.title}}1</a></td>
                         <td>{{getPublishedStatus(item.startDate,item.endDate )}}</td>
                         <td>{{item.startDate}}</td>
                         <td>{{item.endDate}}</td>

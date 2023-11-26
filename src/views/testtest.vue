@@ -189,7 +189,6 @@ export default{
         <button type="submit" @click="delete231" id="btn">新增問題</button>
         <button type="submit" @click="goBackDelQn" id="btn">後臺山問卷</button>
         <button type="submit" @click="" id="btn">vuex練習</button>
-        <p>{{this.allQuestionnaireA}}</p>
     </div>
     <div id="question-container" class="question-cont">
     </div>
