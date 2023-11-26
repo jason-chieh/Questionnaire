@@ -7,6 +7,7 @@ export default{
         return{
             // 拿到全部問卷
             allQuestionnaire:[],
+            allQnQu:[],
             //拿到最新問卷的id
             lastestId:1,
             // 題目標題跟題目製作畫面切換
@@ -36,15 +37,17 @@ export default{
             editQuestionanswer:"",
             editMustbechoose:"",
             editType:"",
-            editIndex:0  //單一問題的索引值
+            editIndex:0,  //單一問題的索引值
 
+            updateNum:-1,
             
         }
     },
     methods:{
         goCheckPage(){
             this.createQuestion();
-            this.page=2.5
+            this.allQnQu.length==0 ? this.page=2.5:this.page=2.6
+
         },
         goCalCircle(){
             this.page=4
@@ -61,12 +64,43 @@ export default{
         },
         gotoback(){
             this.$router.push("/backView")
-
         },
+        // 從確認頁前往後端新增並發布
+        gotobackAndAddAndPublished(){
+            var url = "http://localhost:8081/api/quiz/create";
+            var data = {
+                "questionnaire":{
+                    "title":this.questionnaireName,
+                    "description":this.questionnaireContent,
+                    "published":true,
+                    "startDate":this.questionnaireStartDate,
+                    "endDate":this.questionnaireEndDate
+                },
+                "question_list":this.question_list
+            };
+
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+            
+            this.$router.push("/backView")
+        },
+        // 從確認頁前往後端新增
         gotobackAndAdd(){
             this.addquestionnaire();
             this.$router.push("/backView")
-
+        },
+        // 從確認頁前往後端更新
+        gotobackAndUpdate(){
+            this.updatequestionnaire();
+            this.$router.push("/backView")
         },
         //前往單一問題的編輯頁
         goedit(index){
@@ -94,8 +128,11 @@ export default{
 
         },
         // pinia抓取時間
-        ...mapActions(day,["getCurrentDate"]),
-        // 新增問題
+        ...mapActions(day,["getCurrentDate","geteditQuestionnaire","searchAllQna"]),
+
+
+
+        // 前端新增問題們
         addQuestion(){
             let questionObj={
                 quid:this.question_list.length+1,
@@ -113,7 +150,7 @@ export default{
             this.questionanswer = ""
              
         },
-        // 刪除問題們
+        // 前端刪除問題們
         delQuestion(){
             // 把問卷checkbox索引直放到陣列 並把key值抓出來判斷然後刪掉問卷陣列的問題
             for (let i = 0; i < this.indexArr.length; i++) {
@@ -133,7 +170,11 @@ export default{
             }
         
         },
-        // 新增整個問卷加上問題
+
+
+
+
+        // 前往後端新增整個問卷加上問題
         addquestionnaire(){
             var url = "http://localhost:8081/api/quiz/create";
             var data = {
@@ -158,7 +199,33 @@ export default{
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
         },
-        // 搜尋全部問卷
+        // 前往後端  更新  整個問卷加上問題
+        updatequestionnaire(){
+            var url = "http://localhost:8081/api/quiz/update";
+            var data = {
+                "questionnaire":{
+                    "id":this.updateNum,
+                    "title":this.questionnaireName,
+                    "description":this.questionnaireContent,
+                    "published":false,
+                    "startDate":this.questionnaireStartDate,
+                    "endDate":this.questionnaireEndDate
+                },
+                "question_list":this.question_list
+            };
+
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+        },
+        // 前往後端搜尋全部問卷
         searchAllQn(){
             const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
             // 要帶入的值
@@ -190,10 +257,12 @@ export default{
             this.allQuestionnaire = this.allQuestionnaire.questionnaireList;
             this.allQuestionnaire = this.allQuestionnaire.reverse();
             this.lastestId = (this.allQuestionnaire[0].id)+1;
-            console.log(this.allQuestionnaire)
+            // console.log(this.allQuestionnaire)
 
             })
         },
+
+
         //生成確認問題
         createQuestion(){
         
@@ -266,6 +335,10 @@ export default{
 
         }
     },
+    computed:{
+    // 抓取pinia裡面算出的值今天日期跟七天後
+    ...mapState(day,["nowday","twoday","sevenday","twodayS","allQuestionnaireA"])
+    },
     mounted(){
         // 抓取日期
         this.getCurrentDate()
@@ -277,11 +350,36 @@ export default{
         logindate.value = this.twoday
         sevendate.value = this.twodayS
 
+
+
+        //去後端抓取問卷資料
         this.searchAllQn();
-    },
-    computed:{
-    // 抓取pinia裡面算出的值今天日期跟七天後
-    ...mapState(day,["nowday","twoday","sevenday","twodayS"])
+
+
+        //抓取要編輯的問卷代碼   要編輯的話才會跑進來喔~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        let x = this.geteditQuestionnaire();
+        this.updateNum = x;
+        if(x!=-1){
+            const arr = this.allQuestionnaireA.quizVoList
+            this.allQnQu = arr
+            console.log(this.allQnQu)
+            for(let i = 0 ; i< this.allQnQu.length ; i++){
+                if(this.allQnQu[i].questionnaire.id==x){
+                    this.questionnaireName = this.allQnQu[i].questionnaire.title;
+                    this.questionnaireContent = this.allQnQu[i].questionnaire.description;
+                    this.questionnaireStartDate =this.allQnQu[i].questionnaire.startDate;
+                    this.questionnaireEndDate = this.allQnQu[i].questionnaire.endDate;
+                    this.question_list = this.allQnQu[i].question_list
+                    
+                }
+                
+            }
+            return
+        }
+
+        console.log("不編輯")
+
+        
     },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
@@ -363,7 +461,7 @@ export default{
                 </div>
             </div>
             <!-- 確認頁面表 -->
-            <div v-show="page==2.5" class="checkPage">
+            <div v-show="page==2.5||page==2.6" class="checkPage">
                 <h1>{{this.questionnaireName}}</h1>
                 <p style="font-weight: bold;">內容:{{this.questionnaireContent}}</p>
                 <label for="">姓名:</label>
@@ -420,10 +518,15 @@ export default{
                 <button @click="goTitle" class="chancel buttont" type="button">上一步</button>
                 <button @click="goCheckPage" class="send buttont" type="button">前往確認頁</button>
             </div>
+            <!-- 確認頁面的底下 -->
             <div v-show="page==2.5" class="bot">
                 <button @click="goQuestion" class="chancel buttont" type="button">取消新增回編輯</button>
                 <button @click="gotobackAndAdd" class="send buttont" type="button">確定新增</button>
-                <button @click="gotobackAndAdd" class="send buttont" type="button">新增並馬上發布</button>
+                <button @click="gotobackAndAddAndPublished" class="send buttont" type="button">新增並馬上發布</button>
+            </div>
+            <div v-show="page==2.6" class="bot">
+                <button @click="goQuestion" class="chancel buttont" type="button">取消更新</button>
+                <button @click="gotobackAndUpdate" class="send buttont" type="button">更新</button>
             </div>
         </div>
     </div>

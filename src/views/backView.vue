@@ -1,6 +1,8 @@
 <script>
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
+
+import {RouterLink} from "vue-router"
 export default{
     data(){
         return{
@@ -13,17 +15,16 @@ export default{
             searchText:"",
             searchStartDate: "",
             searchEndDate:"",
-            //點選後臺問卷的索引直陣列
+            //要去後台刪除問卷~ 前台點選問卷的索引直陣列
             indexArr: []
-  
-
         
         }
     },
     components:{
-        
+        RouterLink
     },
     methods:{
+        //跳轉頁面們
         gocal(){
         this.$router.push("/CalView")
         },
@@ -31,8 +32,16 @@ export default{
         this.$router.push("/vote")
         },
         gotoaddQuestion(){
-        this.$router.push("/addQuestion")
+            this.seteditQuestionnaire(-1)
+            this.$router.push("/addQuestion")
         },
+        gotoEditQuestion(index){
+            var pagekey = (this.perpage*(this.currentPage-1))+index
+            var editId = this.allQuestionnaire[pagekey].id
+            this.seteditQuestionnaire(editId)
+            this.$router.push("/addQuestion")
+        },
+        
         // 後端抓取問卷全部資料
         searchAllQn(){
             const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
@@ -75,14 +84,15 @@ export default{
         }
         this.currentPage = page
         },
-        // 刪除列表業的問卷 
+        // 刪除列表業的問卷
         deleQn() {
+            //終止方法的可愛變數
             let stopDel=false;
             // 後端需要的qnidList
             var data = [
                 
             ];
-
+            //前端要得索引值
             var data1 = [
                 
             ];
@@ -98,6 +108,8 @@ export default{
                 data.push(this.allQuestionnaire[indexNum].id)
             }
             console.log(data1);
+
+
             //判斷這幾個裡面有沒有已經出版在進行中的資料
             for(let w = 0; w<data1.length ; w++){
                 const SSdate = new Date(this.allQuestionnaire[data1[w]].startDate);
@@ -110,12 +122,14 @@ export default{
             };
 
             
-            // 抓到當中有出版的直接終止掉----------------
             if(stopDel){
                 alert("當中包含已出版且已經開始的問卷")
+                this.indexArr=[];
                 return 
             }
-            console.log("==============================")
+              // 抓到當中有出版的直接終止掉-----------------------------------------------------------------
+
+            
 
             //把前端的資料刪掉
             for(let i = 0; i < this.allQuestionnaire.length; i++){
@@ -127,6 +141,7 @@ export default{
                 }
             }
 
+            //前往後端刪資料
             var url = "http://localhost:8081/api/quiz/deleteQuestionnaire";
             fetch(url, {
             method: "POST", // or 'PUT'
@@ -159,6 +174,7 @@ export default{
                 return "進行中";
             }
         },
+        // 點選checkbox會把陣列object化可以去判斷第幾頁第幾個checkbox
         addNumInIndexArr(index){
             let obj ={
                 currPage:this.currentPage,
@@ -177,8 +193,8 @@ export default{
 
 
         },
-        // 執行方法獲得日期
-        ...mapActions(day,["getCurrentDate"]),
+        // 執行方法獲得日期 還有 設定編輯問卷的代碼
+        ...mapActions(day,["getCurrentDate","seteditQuestionnaire"]),
     },
     mounted(){
         // // 抓取日期
@@ -189,9 +205,9 @@ export default{
         // logindate.value = this.nowday
         // sevendate.value = this.sevenday
 
+
         // //自動抓取全部問卷
         this.searchAllQn();
-        // console.log(this.allData1)
 
     },
     updated(){
@@ -263,11 +279,11 @@ export default{
                         <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)"  >
                             <td ><input type="checkbox"  v-model="item.checked" @click="addNumInIndexArr(index)" ></td>
                             <td >{{item.id}}</td>
-                            <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}</a></td>
+                            <td ><a :key="index" :id="this.currentPage+'-'+index" @click="gotoEditQuestion(index)" href="#">{{item.title}}</a></td>
                             <td >{{getPublishedStatus(item.published, item.startDate,item.endDate )}}</td>
                             <td>{{item.startDate}}</td>
                             <td>{{item.endDate}}</td>
-                            <td :key="index" @click="gocal(index)"><a href="#">統計連結</a></td>
+                            <td :key="index" ><a  @click="gocal(index)" href="#">統計連結</a></td>
                         </tr>
                         <!-- 可以继续添加更多的行 -->
                     </tbody>

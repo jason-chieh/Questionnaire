@@ -67,8 +67,22 @@ export default{
             }
             this.currentPage = page
         },
+        // 處理問卷文字狀態  
+        getPublishedStatus(startDate,endDate) {  
+            const SSdate = new Date(startDate);
+            const EEdate = new Date(endDate);
+            const NNdate = new Date(this.nowday);
+            if (NNdate < SSdate) {
+                return "尚未開始";
+            }
+            if (NNdate > EEdate) {
+                return "已結束";
+            }
+            return "進行中";
+            
+        },
         // 執行方法獲得日期
-        ...mapActions(day,["getCurrentDate"]),
+        ...mapActions(day,["getCurrentDate","searchAllQna"]),
     },
 
     mounted(){
@@ -84,6 +98,9 @@ export default{
 
         // 去找資料庫前台列表
         this.searchAllQn()
+
+        //pinya去抓後台資料
+        this.searchAllQna();
 
 
         },
@@ -147,10 +164,10 @@ export default{
                     <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
                         <td >{{item.id}}</td>
                         <td :key="index" @click="gotovote(index)"><a href="#">{{item.title}}1</a></td>
-                        <td>{{this.nowday>item.endDate? "停止中":"開放中"}}</td>
+                        <td>{{getPublishedStatus(item.startDate,item.endDate )}}</td>
                         <td>{{item.startDate}}</td>
                         <td>{{item.endDate}}</td>
-                        <td :key="index" @click="gocal(index)"><a href="#">統計連結</a></td>
+                        <td :key="index" ><a @click="gocal(index)" href="#">統計連結</a></td>
                     </tr>
                     <!-- 可以继续添加更多的行 -->
                 </tbody>

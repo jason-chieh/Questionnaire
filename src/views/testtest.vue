@@ -1,5 +1,8 @@
 <script>
 import { sassNull } from 'sass';
+import {mapState,mapActions} from 'pinia'
+import day from '../stores/day'
+
 
 export default{
     data(){
@@ -152,13 +155,24 @@ export default{
             } else {
             console.error('找不到指定的 div 元素');
 }
-        }
+        },
+        increment() {
+            this.$store.commit('increment')
+            console.log(this.$store.state.count)
+        },
+        ...mapActions(day,["searchAllQna"]),
                         
     },
     mounted(){
+        this.searchAllQna();
+        console.log("ssssss")
+        console.log(this.aaa)
+    },
+    beforeMount(){
+    
     },
     computed: {
-
+        ...mapState(day,["allQuestionnaireA"])
     },
     updated(){
     }
@@ -174,6 +188,8 @@ export default{
         <button type="submit" @click="createQ" id="btn">新增問題</button>
         <button type="submit" @click="delete231" id="btn">新增問題</button>
         <button type="submit" @click="goBackDelQn" id="btn">後臺山問卷</button>
+        <button type="submit" @click="" id="btn">vuex練習</button>
+        <p>{{this.allQuestionnaireA}}</p>
     </div>
     <div id="question-container" class="question-cont">
     </div>

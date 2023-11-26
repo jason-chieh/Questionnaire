@@ -3,11 +3,16 @@ import { defineStore } from 'pinia';
 
 export default defineStore("day",{
     state:()=>({
-    
+        allQuestionnaireA:[],
+        //
+        editQuestionnaire:0
+        
     }),
     getters:{
+
     },
     actions:{
+        //抓取當天日期
         getCurrentDate() {
 
             // 這是今天日期
@@ -46,5 +51,48 @@ export default defineStore("day",{
             var twoDateDayS = twoDateS.getDate().toString().padStart(2, '0');
             this.twodayS = twoDateYearS+'-' + twoDateMonthS + '-' + twoDateDayS;
         },
+
+        //把後端所有問卷包括小問題抓出來
+        searchAllQna(){
+            var arr =[];
+            const url = 'http://localhost:8081/api/quiz/search1';
+            // 要帶入的值
+
+            const queryParams = new URLSearchParams({
+            title: "",
+            startDate:"2000-01-01",
+            endDate:"2099-01-01",
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+                this.allQuestionnaireA=data
+            })
+        },
+
+        geteditQuestionnaire(){
+            console.log(this.editQuestionnaire)
+            return this.editQuestionnaire
+        },
+        seteditQuestionnaire(num){
+            this.editQuestionnaire = num ;
+        }
+
+
     }
 })
