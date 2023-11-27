@@ -33,10 +33,14 @@ export default{
             alert("問卷已經結束或是還沒開始喔")
             return
         }
-        console.log("123456789")
 
-        this.prepareVote();
-        this.$router.push("/vote")
+
+        this.prepareVote().then(() => {
+        // 確保在導航之前所有非同步操作都已完成
+        this.$router.push("/vote");
+        });
+        // this.prepareVote();
+        // this.$router.push("/vote")
         },
         // 後端抓取問卷抓取已出版的
         searchAllQn(){
@@ -104,9 +108,9 @@ export default{
         // 要把值設定給畫面
         const logindate = document.getElementById('logindate')
         // const sevendate = document.getElementById('sevendate')
-        this.searchStartDate = this.nowday
+        // this.searchStartDate = this.nowday
         // this.searchEndDate = this.sevenday
-        logindate.value = this.nowday
+        // logindate.value = this.nowday
         // sevendate.value = this.sevenday
 
         // 去找資料庫前台列表
@@ -117,6 +121,7 @@ export default{
 
         //pinya抓已出版的問卷
         this.searchAllQnIsPublished();
+
 
 
         },
@@ -215,7 +220,6 @@ export default{
 $maincolor:#00A9FF;
 .bg{
 width: 100vw;
-height: 90vh;
 background-color: #00A9FF;
 display: flex;
 justify-content: center;
@@ -226,6 +230,7 @@ flex-direction: column;
         height: 20vh;
         background-color: rgb(218, 218, 218);
         display: flex;
+        margin-top: 5vh;
         .searchBlockLeft{
             width: 40vw;
             height: 20vh;
@@ -292,6 +297,7 @@ flex-direction: column;
     .showBlock{
     margin-top: 5vh;
     width: 80vw;
+    height: 65vh;
     background-color: rgb(218, 218, 218);
     border-radius: 5px;
     table {

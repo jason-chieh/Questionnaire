@@ -60,7 +60,7 @@ export default defineStore("day",{
         },
 
         //把後端所有問卷包括小問題抓出來--------------------
-        searchAllQna(){
+        async searchAllQna(){
             var arr =[];
             const url = 'http://localhost:8081/api/quiz/search1';
             // 要帶入的值
@@ -74,7 +74,7 @@ export default defineStore("day",{
             // 將查詢字串附加到 URL
             const urlWithParams = `${url}?${queryParams}`;
 
-            fetch(urlWithParams, {
+            await fetch(urlWithParams, {
             method: "GET", 
             headers: new Headers({
                 "Accept":"application/json",
@@ -89,10 +89,11 @@ export default defineStore("day",{
             .then(data => {
             // 將API回應的JSON數據設置到組件的responseData數據屬性中
                 this.allQuestionnaireA=data
+                // console.log(this.allQuestionnaireA);
             })
         },
         // 後端抓取問卷   已出版的
-        searchAllQnIsPublished(){
+        async searchAllQnIsPublished(){
                 const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
                 // 要帶入的值
     
@@ -106,7 +107,7 @@ export default defineStore("day",{
                 // 將查詢字串附加到 URL
                 const urlWithParams = `${url}?${queryParams}`;
     
-                fetch(urlWithParams, {
+                await fetch(urlWithParams, {
                 method: "GET", 
                 headers: new Headers({
                     "Accept":"application/json",
@@ -124,13 +125,13 @@ export default defineStore("day",{
                 })
         },
         //去抓看到底是哪張問卷要投票生成
-        prepareVote(){
+        async prepareVote(){
             const a =this.getTellVoteWhichOne()
             const arr = this.isPublishedQnArr.questionnaireList
             for(let i=0 ; i< arr.length;i++){
                 if(arr[i].id==a){
                     this.fromPinyaQn=arr[i]
-                    console.log(this.fromPinyaQn)
+                    
                 }
             }
 
@@ -144,7 +145,7 @@ export default defineStore("day",{
             // 將查詢字串附加到 URL
             const urlWithParams = `${url}?${queryParams}`;
 
-            fetch(urlWithParams, {
+            await fetch(urlWithParams, {
             method: "GET", 
             headers: new Headers({
                 "Accept":"application/json",
@@ -160,9 +161,9 @@ export default defineStore("day",{
             // 將API回應的JSON數據設置到組件的responseData數據屬性中
             this.questionArr = data;
             this.questionArr = this.questionArr.questionList
-            console.log(this.questionArr)
+            // console.log(this.questionArr)
             })
-
+            // return Promise.resolve();
         },
 
 

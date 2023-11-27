@@ -141,6 +141,9 @@ export default{
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
         },
+        creatennnnnn(){
+
+        },
 
         // 刪除子div子元素
         delete231(){

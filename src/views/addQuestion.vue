@@ -40,7 +40,7 @@ export default{
             editIndex:0,  //單一問題的索引值
 
             updateNum:-1,
-            
+            editNum:0
         }
     },
     methods:{
@@ -73,7 +73,7 @@ export default{
                     "title":this.questionnaireName,
                     "description":this.questionnaireContent,
                     "published":true,
-                    "startDate":this.questionnaireStartDate,
+                    "startDate":this.nowday,
                     "endDate":this.questionnaireEndDate
                 },
                 "question_list":this.question_list
@@ -137,6 +137,7 @@ export default{
             if(this.allQnQu.length!=0){
                 this.lastestId--
             }
+
             let questionObj={
                 quid:this.question_list.length+1,
                 qnid:this.lastestId,
@@ -145,7 +146,10 @@ export default{
                 necessary:this.mustbechoose,
                 option:this.questionanswer.length==0 ?"打字回答~":this.questionanswer,
             }
-            console.log(questionObj.option)
+            if(this.editNum!=0){
+                questionObj.qnid=this.editNum
+            }
+            console.log(questionObj)
             this.question_list.push(questionObj)
             this.indexArr.push(false)
             this.question = ""
@@ -364,6 +368,7 @@ export default{
         this.updateNum = x;
         
         if(x!=-1){
+            this.editNum=x;
             // console.log(this.lastestId)
             const arr = this.allQuestionnaireA.quizVoList
             this.allQnQu = arr
@@ -390,6 +395,7 @@ export default{
     unmounted(){
         // pinya收尋後端問卷
         this.searchAllQna();
+        this.editNum=0
     },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")

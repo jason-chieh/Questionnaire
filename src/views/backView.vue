@@ -39,9 +39,10 @@ export default{
             var pagekey = (this.perpage*(this.currentPage-1))+index
             var editId = this.allQuestionnaire[pagekey].id
             this.seteditQuestionnaire(editId)
+            this.searchAllQna();
             this.$router.push("/addQuestion")
+            
         },
-        
         // 後端抓取問卷全部資料
         searchAllQn(){
             const url = 'http://localhost:8081/api/quiz/searchQuestionnaireList1';
@@ -194,7 +195,7 @@ export default{
 
         },
         // 執行方法獲得日期 還有 設定編輯問卷的代碼
-        ...mapActions(day,["getCurrentDate","seteditQuestionnaire","searchAllQna"]),
+        ...mapActions(day,["getCurrentDate","seteditQuestionnaire","searchAllQna","searchAllQnIsPublished"]),
     },
     mounted(){
         // // 抓取日期
@@ -210,6 +211,9 @@ export default{
 
         // //自動抓取全部問卷
         this.searchAllQn();
+
+        //pinya抓已出版的問卷
+        this.searchAllQnIsPublished();
 
     },
     unmounted(){
@@ -324,7 +328,6 @@ export default{
 $maincolor:#00A9FF;
 .bg{
     width: 100vw;
-    height: 90vh;
     background-color: #00A9FF;
     display: flex;
     justify-content: center;
@@ -427,7 +430,7 @@ $maincolor:#00A9FF;
     }
     .showBlock{
         width: 80vw;
-        // height: 41vh;
+        height: 65vh;
         background-color: rgb(218, 218, 218);
         border-radius: 5px;
         table {
