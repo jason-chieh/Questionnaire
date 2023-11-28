@@ -177,9 +177,6 @@ export default{
         
         },
 
-
-
-
         // 前往後端新增整個問卷加上問題
         addquestionnaire(){
             var url = "http://localhost:8081/api/quiz/create";
@@ -400,7 +397,7 @@ export default{
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
         // console.log(this.indexArr)
-        // console.log(this.question_list)
+        // console.log(allQuestionnaireA)
     }
 }
 </script>

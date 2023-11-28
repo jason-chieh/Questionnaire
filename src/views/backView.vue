@@ -2,6 +2,8 @@
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
 
+import Swal from 'sweetalert2'
+
 import {RouterLink} from "vue-router"
 export default{
     data(){
@@ -24,6 +26,45 @@ export default{
         RouterLink
     },
     methods:{
+        // 特效提示框
+        specialNotion(){
+            Swal.fire({
+                title: '不能更新!',
+                text: '請更新未發佈或是未開始~',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        //判斷時間是不是已經到了問卷要出版了
+        checkedQnShouldPublished(){
+            var checkDataPublished =[]
+
+            this.allQuestionnaire.forEach(element => {
+                const stDay =new Date(element.startDate)
+                const nDay  =new Date(this.nowday)
+                if(nDay>=stDay&&element.published==false){
+                    element.published=true
+                    checkDataPublished.push(element.id)
+                    console.log("發現了時間到了未發佈")
+                }
+            });
+            console.log("有發現時間到了未發佈的嗎")
+
+            if(checkDataPublished.length!=0){
+                var url = "http://localhost:8081/api/quiz/updateQuestionnaireList";
+                fetch(url, {
+                method: "POST", // or 'PUT'
+                body: JSON.stringify(checkDataPublished), // data can be `string` or {object}!
+                headers: new Headers({
+                    "Content-Type": "application/json",
+                }),
+                })
+                .then((res) => res.json())
+                .catch((error) => console.error("Error:", error))
+                .then((response) => console.log("Success:", response));
+            }
+
+        },
         //跳轉頁面們
         gocal(){
         this.$router.push("/CalView")
@@ -36,7 +77,17 @@ export default{
             this.$router.push("/addQuestion")
         },
         gotoEditQuestion(index){
+            //先去算索引值數字
             var pagekey = (this.perpage*(this.currentPage-1))+index
+
+            const stDay =new Date(this.allQuestionnaire[pagekey].startDate)
+            const edDay =new Date(this.allQuestionnaire[pagekey].endDate)
+            const nDay  =new Date(this.nowday)
+            if(nDay>edDay || nDay>=stDay){
+                this.specialNotion();
+                return
+            }
+
             var editId = this.allQuestionnaire[pagekey].id
             this.seteditQuestionnaire(editId)
             this.searchAllQna();
@@ -158,6 +209,32 @@ export default{
 
 
         },
+        // 前往後端  更新  整個問卷加上問題
+        updatequestionnaire(){
+            var url = "http://localhost:8081/api/quiz/update";
+            var data = {
+                "questionnaire":{
+                    "id":this.updateNum,
+                    "title":this.questionnaireName,
+                    "description":this.questionnaireContent,
+                    "published":false,
+                    "startDate":this.questionnaireStartDate,
+                    "endDate":this.questionnaireEndDate
+                },
+                "question_list":this.question_list
+            };
+
+            fetch(url, {
+            method: "POST", // or 'PUT'
+            body: JSON.stringify(data), // data can be `string` or {object}!
+            headers: new Headers({
+                "Content-Type": "application/json",
+            }),
+            })
+            .then((res) => res.json())
+            .catch((error) => console.error("Error:", error))
+            .then((response) => console.log("Success:", response));
+        },
         // 處理問卷文字狀態  
         getPublishedStatus(published,startDate,endDate) {
             if(!published){
@@ -218,7 +295,11 @@ export default{
     },
     unmounted(){
         // pinya收尋後端問卷
-        this.searchAllQna();
+        this.searchAllQna();    
+        //離開的時候必須去檢查問卷時間是否到期然後要出版
+        this.checkedQnShouldPublished();
+
+
     },
     updated(){
         // console.log(this.indexArr)
@@ -227,7 +308,7 @@ export default{
 
     computed:{
         // 抓取pinia裡面算出的值今天日期跟七天後
-        ...mapState(day,["nowday","sevenday"])
+        ...mapState(day,["nowday","sevenday","allQuestionnaireA"])
         ,
         // 頁面頁籤計算
         totalPage() {

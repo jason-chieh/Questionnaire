@@ -1,5 +1,6 @@
 <script>
 import {mapState,mapActions} from 'pinia'
+import Swal from 'sweetalert2'
 import day from '../stores/day'
 export default{
     data(){
@@ -15,23 +16,136 @@ export default{
                 answerPhone:"",
                 answerEmail:"",
                 answerAge:"",
-            
+                //建立必填問題檢查碼
+                MustBeAnswerNum:0,
+                //此問卷的大號碼
+                thisQnNumber:0,
+                //創立一個答案陣列依序
+                AllanswerArr:[],
+
+                // 定義正規表式
+                nameRegex: /^\D+$/,
+                phoneRegex: /^\d{10}$/,
+                emailRegex: /@/,
+                ageRegex: /^\d+$/
 
         }
     },
     components:{
     },
     methods:{
-        goconfirm(){
-        this.createCheckQuestion();
-        this.page = 2 
+        // 特效提示框基本資料沒填--年紀
+        specialNotion11(){
+            Swal.fire({
+                title: '年齡請確實填寫!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
         },
+        // 特效提示框基本資料沒填---姓名
+        specialNotion12(){
+            Swal.fire({
+                title: '姓名請不要填數字!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        // 特效提示框基本資料沒填---手機
+        specialNotion13(){
+            Swal.fire({
+                title: '手機只能十個數字!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        // 特效提示框基本資料沒填-信箱
+        specialNotion14(){
+            Swal.fire({
+                title: '信箱格式不符!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        // 特效提示框必填沒填
+        specialNotion2(){
+            Swal.fire({
+                title: '必填沒填!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        //前往確認頁
+        goconfirm(){
+                // //檢查基本資料有沒有填
+                // if (!this.nameRegex.test(this.answerName)) {
+                //         this. specialNotion12()
+                //         return
+                // }
+
+                // if (!this.phoneRegex.test(this.answerPhone)) {
+                //         this. specialNotion13()
+                //         return
+                // }
+
+                // if (!this.emailRegex.test(this.answerEmail)) {
+                //         this. specialNotion14()
+                //         return
+                // }
+
+                // if (!this.ageRegex.test(this.answerAge)) {
+                //         this. specialNotion11()
+                //         return
+                // }
+        if(this.answerName==""|this.answerPhone==""|this.answerEmail==""|this.answerAge==""){
+            this.specialNotion();
+            return
+        }
+        this.createCheckQuestion();
+        if(this.MustBeAnswerNum!=0){
+            //執行特效框
+            this.specialNotion2();
+
+            //===================================刪除創建資料
+            // 取得父級 div
+            const checkquestionPlace = document.getElementById('checkQuestionPlace');
+            // 取得父級 div 的所有子級 div
+            const childDivs = checkquestionPlace.querySelectorAll('div');
+            // 迭代所有子級 div 並刪除它們
+            childDivs.forEach(childDiv => {
+                childDiv.remove();
+            });
+            //===================================讓必填檢查碼歸零
+            this.MustBeAnswerNum--;
+            return
+        }
+        this.page = 2 
+        
+        },
+        //回去作答頁
         backconfirm(){
-        this.page = 1 
+            this.page = 1 
+
+            //=================================把確認頁先清空
+            // 取得父級 div
+            const checkquestionPlace = document.getElementById('checkQuestionPlace');
+            // 取得父級 div 的所有子級 div
+            const childDivs = checkquestionPlace.querySelectorAll('div');
+            // 迭代所有子級 div 並刪除它們
+            childDivs.forEach(childDiv => {
+                childDiv.remove();
+            });
+
+
+            //===================================讓答案陣列歸零
+            this.AllanswerArr=[];
         },
         //生成作答問題===========================================================
         createQuestion(){
-
             // 將問題和選項生成到此元素中
             const createQuestionPlace = document.getElementById('createQuestionPlace');
 
@@ -105,28 +219,7 @@ export default{
         },
         //生成確認答案===========================================================
         createCheckQuestion(){
-            // // 获取 createQuestionPlace 中所有的 input 元素
-            // const inputs = document.querySelectorAll('#createQuestionPlace input');
-            // // 创建一个对象，用于存储每个 input 元素的值
-            // const inputValues = [];
-            // // 遍历所有 input 元素并将它们的值存储到 inputValues 对象中
-            // inputs.forEach(input => {
-            //     const inputId = input.id; // 获取 input 元素的 id 或者其他属性
-            //     const inputValue = input.value; // 获取 input 元素的值
-            //     const inputchecked = input.checked; // 获取 input 元素的值
-            //     const inputRequired = input.required; // 获取 input 元素的值
-            //     let obj={
-            //         id:inputId,
-            //         value:inputValue,
-            //         check:inputchecked,
-            //         required:inputRequired
 
-            //     }
-            //     inputValues.push(obj); 
-            // });
-            // // 现在 inputValues 对象中存储了每个 input 元素的值，可以根据需要使用这些值
-            // console.log('所有 input 元素的值:', inputValues);
-            // console.log(this.questionArr)
             var radioArr=[];
             var checkboxArr=[];
             var textArr=[];
@@ -143,6 +236,7 @@ export default{
                 radioArr.push(answer)
             });
             console.log('單選按鈕作答答案：', radioAnswers);
+            console.log(typeof radioAnswers);
 //==========================================================================================
             const form1 = document.getElementById('createQuestionPlace');
             const checkboxAnswers = {};
@@ -160,6 +254,7 @@ export default{
                 checkboxArr.push(checkboxAnswers.null)
             });
             console.log('多選框作答答案：', checkboxAnswers.null);
+            console.log(typeof checkboxAnswers.null);
             // 可以將答案進行其他處理或儲存
 //==========================================================================================
             const form2 = document.getElementById('createQuestionPlace');
@@ -173,6 +268,7 @@ export default{
                     textArr.push(answer)
                 });
                 console.log('文字輸入框作答答案：', textArr);
+                console.log(typeof textArr);
                 // 可以將答案進行其他處理或儲存
 
             
@@ -180,21 +276,42 @@ export default{
 
 
 
+            // 必填檢查碼
+            var Must = 0 ;
             // 將問題和選項生成到此元素中
             const checkQuestionPlace = document.getElementById('checkQuestionPlace');
             // 遍歷問題列表
             this.questionArr.forEach(question => {
+
                     var answer = "";
                     // 創建問題的容器 div
                     const questionDiv = document.createElement('div');
                     if(question.optionType=="單選"){
                         answer =radioArr[0]
+                        this.AllanswerArr.push(answer)
+                        if(question.necessary==true&&answer==null){
+                            Must++
+                            return
+                        }
                     }
                     if(question.optionType=="多選"){
-                        answer = checkboxArr[0]
+                        let answerArr = checkboxArr[0] 
+                        answerArr.forEach(element => {
+                            answer=answer+element
+                        });
+                        this.AllanswerArr.push(answer)
+                        if(question.necessary==true&&answer==null){
+                            Must++
+                            return
+                        }
                     }
                     if(question.optionType=="文字回答"){
                         answer =textArr[0]
+                        this.AllanswerArr.push(answer)
+                        if(question.necessary==true&&answer==null){
+                            Must++
+                            return
+                        }
                     }
 
                     // 添加問題標題
@@ -206,9 +323,10 @@ export default{
                     questionTitle.setAttribute('style', 'font-size: 16pt;font-weight: bold;'); //小問題設定字型大小
                     questionDiv.appendChild(questionTitle);
                     questionDiv.appendChild(questionAnswer);
+
                     // 將問題容器添加到整體容器中
                     checkQuestionPlace.appendChild(questionDiv);
-
+                    
                     if(question.optionType=="單選"){
                         radioArr.splice(0,1)
                     }
@@ -218,7 +336,42 @@ export default{
                     if(question.optionType=="文字回答"){
                         textArr.splice(0,1)
                     }
-            });
+                });
+                if(Must!=0){
+                    this.MustBeAnswerNum++;
+                }
+        },
+        // //新增答案是後台
+        addUserAnswer(){
+                let i = 0 ;
+                this.questionArr.forEach(question => {
+                    const url = 'http://localhost:8081/api/quiz/addAnswer';
+                    // 要帶入的值
+                    var data = {
+                        "user":{
+                            "name":this.answerName,
+                            "phoneNumber":this.answerPhone,
+                            "email":this.answerEmail,
+                            "age":parseInt(this.answerAge),
+                            "qnid":this.thisQnNumber,
+                            "qid":question.quid,
+                            "ans":this.AllanswerArr[i]
+                        }
+                    };
+
+                    fetch(url, {
+                    method: "POST", // or 'PUT'
+                    body: JSON.stringify(data), // data can be `string` or {object}!
+                    headers: new Headers({
+                        "Content-Type": "application/json",
+                    }),
+                    })
+                    .then((res) => res.json())
+                    .catch((error) => console.error("Error:", error))
+                    .then((response) => console.log("Success:", response));
+                    i++
+                });
+                
         },
         // pinya執行方法獲得方法
         ...mapActions(day,["getTellVoteWhichOne","searchAllQnIsPublished","getfromPinyaQn","getquestionArr","setquestionArr"]),
@@ -244,6 +397,7 @@ export default{
         //創建問卷可以作答
         this.createQuestion();
 
+        this.thisQnNumber = this.getTellVoteWhichOne()
 
 
     },
@@ -253,7 +407,7 @@ export default{
     },
     updated(){
         // console.log(this.isPublishedQnArr)
-        // console.log(this.getTellVoteWhichOne())
+        // console.log(this.AllanswerArr)
     }
 }
 </script>
@@ -283,17 +437,19 @@ export default{
         <h1>請確認問卷</h1>
         <div class="checkAnswerPlace">
             <h1>{{this.fromPinyaQn.title}}</h1>
-            <p  style="font-weight: bold;">內容:{{this.fromPinyaQn.description}}</p>
-            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';margin-left: 10vw;">姓名:{{this.answerName==""?"你還沒填個人資訊":this.answerName}}</p>
-            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';margin-left: 10vw;">手機:{{this.answerPhone==""?"你還沒填個人資訊":this.answerPhone}}</p>
-            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';margin-left: 10vw;">信箱:{{this.answerEmail==""?"你還沒填個人資訊":this.answerEmail}}</p>
-            <p class="pp"  for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';margin-left: 10vw;">年紀:{{this.answerAge==""?"你還沒填個人資訊":this.answerAge}}</p>
+            <p  style="font-weight: bold;text-align: center;">內容:{{this.fromPinyaQn.description}}</p>
+            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';">姓名:{{this.answerName==""?"你還沒填個人資訊":this.answerName}}</p>
+            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';">手機:{{this.answerPhone==""?"你還沒填個人資訊":this.answerPhone}}</p>
+            <p class="pp" for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';">信箱:{{this.answerEmail==""?"你還沒填個人資訊":this.answerEmail}}</p>
+            <p class="pp"  for="" style="font-weight: bold;font-size: 16pt;font-family:'微軟正黑體';">年紀:{{this.answerAge==""?"你還沒填個人資訊":this.answerAge}}</p>
             <!-- //下面是自動生成的 -->
             <div id="checkQuestionPlace" class="checkquestionPlace">
             </div>
         </div>
-
-        <button @click="backconfirm" type="button">返回更改答案</button>
+        <div class="botBtn">
+            <button @click="backconfirm" type="button">返回更改答案</button>
+            <button @click="addUserAnswer" type="button">新增你的答案</button>
+        </div>
     </div>
 
 </template>
@@ -376,19 +532,26 @@ export default{
         .checkquestionPlace{
         background-color: rgb(218, 218, 218);
         border-radius: 5px;
+        border: 1px solid black;
             label{
                 font-size: 16pt;
                 font-weight: bold;
             }
         }
     }
-  
-    button{
+    .botBtn{
+        display: flex;
+        button{
         margin: 2% 2%;
         border: 0;
         width: 150px;
+        font-weight: bold;
+        font-size: 14pt;
         height: 50px;
         border-radius: 5px;
+        background-color: rgb(80, 80, 248);
     }
+    }
+
 }
 </style>

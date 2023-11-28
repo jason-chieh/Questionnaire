@@ -1,6 +1,10 @@
 <script>
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
+
+import Swal from 'sweetalert2'
+
+
 export default{
     data(){
         return{
@@ -19,6 +23,15 @@ export default{
         
     },
     methods:{
+        // 特效提示框
+        specialNotion(){
+            Swal.fire({
+                title: '問卷已經結束或是還沒開始喔!',
+                text: '請點選正在進行中的問卷~',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
         gocal(){
         this.$router.push("/CalView")
         },
@@ -30,7 +43,7 @@ export default{
         const edDay =new Date(this.allQuestionnaire[key].endDate)
         const nDay  =new Date(this.nowday)
         if(nDay>edDay || nDay<stDay){
-            alert("問卷已經結束或是還沒開始喔")
+            this.specialNotion()
             return
         }
 
