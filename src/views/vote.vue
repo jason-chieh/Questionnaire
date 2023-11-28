@@ -9,21 +9,22 @@ export default{
                 page:1,
                // 從pinya拿到home給我們的問卷標題
                 fromPinyaQn:[],
+
                 //從方法拿到的問卷小問題們
                 questionArr:[],
+                //創立一個答案陣列依序
+                AllanswerArr:[],
+
                 //綁定及時的姓名,年紀，信箱，手機
                 answerName:"",
                 answerPhone:"",
                 answerEmail:"",
                 answerAge:"",
-                //建立必填問題檢查碼
+                // //建立必填問題檢查碼
                 MustBeAnswerNum:0,
                 //此問卷的大號碼
                 thisQnNumber:0,
-                //創立一個答案陣列依序
-                AllanswerArr:[],
-
-                // 定義正規表式
+                // 定義正規表式---綁定及時的姓名,年紀，信箱，手機
                 nameRegex: /^\D+$/,
                 phoneRegex: /^\d{10}$/,
                 emailRegex: /@/,
@@ -34,37 +35,10 @@ export default{
     components:{
     },
     methods:{
-        // 特效提示框基本資料沒填--年紀
-        specialNotion11(){
-            Swal.fire({
-                title: '年齡請確實填寫!',
-                text: '',
-                icon: 'error',
-                confirmButtonText: 'ok'
-                })
-        },
-        // 特效提示框基本資料沒填---姓名
+        // 特效提示框基本資料沒填
         specialNotion12(){
             Swal.fire({
-                title: '姓名請不要填數字!',
-                text: '',
-                icon: 'error',
-                confirmButtonText: 'ok'
-                })
-        },
-        // 特效提示框基本資料沒填---手機
-        specialNotion13(){
-            Swal.fire({
-                title: '手機只能十個數字!',
-                text: '',
-                icon: 'error',
-                confirmButtonText: 'ok'
-                })
-        },
-        // 特效提示框基本資料沒填-信箱
-        specialNotion14(){
-            Swal.fire({
-                title: '信箱格式不符!',
+                title: '請確實填寫個人資料!',
                 text: '',
                 icon: 'error',
                 confirmButtonText: 'ok'
@@ -81,50 +55,31 @@ export default{
         },
         //前往確認頁
         goconfirm(){
-                // //檢查基本資料有沒有填
-                // if (!this.nameRegex.test(this.answerName)) {
-                //         this. specialNotion12()
-                //         return
-                // }
+            //檢查基本資料有沒有填
+            if (!this.nameRegex.test(this.answerName) || !this.phoneRegex.test(this.answerPhone) || !this.emailRegex.test(this.answerEmail) || !this.ageRegex.test(this.answerAge)) {
+                    this.specialNotion12()
+                    return
+            }
+            this.createCheckQuestion();
 
-                // if (!this.phoneRegex.test(this.answerPhone)) {
-                //         this. specialNotion13()
-                //         return
-                // }
 
-                // if (!this.emailRegex.test(this.answerEmail)) {
-                //         this. specialNotion14()
-                //         return
-                // }
 
-                // if (!this.ageRegex.test(this.answerAge)) {
-                //         this. specialNotion11()
-                //         return
-                // }
-        if(this.answerName==""|this.answerPhone==""|this.answerEmail==""|this.answerAge==""){
-            this.specialNotion();
-            return
-        }
-        this.createCheckQuestion();
-        if(this.MustBeAnswerNum!=0){
-            //執行特效框
-            this.specialNotion2();
-
-            //===================================刪除創建資料
-            // 取得父級 div
-            const checkquestionPlace = document.getElementById('checkQuestionPlace');
-            // 取得父級 div 的所有子級 div
-            const childDivs = checkquestionPlace.querySelectorAll('div');
-            // 迭代所有子級 div 並刪除它們
-            childDivs.forEach(childDiv => {
-                childDiv.remove();
-            });
-            //===================================讓必填檢查碼歸零
-            this.MustBeAnswerNum--;
-            return
-        }
-        this.page = 2 
-        
+            if(this.MustBeAnswerNum!=0){
+                this.specialNotion2();
+                this.MustBeAnswerNum=0
+                 //=================================把確認頁先清空
+                const checkquestionPlace = document.getElementById('checkQuestionPlace');
+                // 取得父級 div 的所有子級 div
+                const childDivs = checkquestionPlace.querySelectorAll('div');
+                // for所有子級 div 並刪除它們
+                childDivs.forEach(childDiv => {
+                    childDiv.remove();
+                });
+                return
+            }else{
+                this.page = 2 
+            }
+            
         },
         //回去作答頁
         backconfirm(){
@@ -139,17 +94,19 @@ export default{
             childDivs.forEach(childDiv => {
                 childDiv.remove();
             });
-
-
-            //===================================讓答案陣列歸零
-            this.AllanswerArr=[];
+            
         },
+
+
         //生成作答問題===========================================================
         createQuestion(){
             // 將問題和選項生成到此元素中
             const createQuestionPlace = document.getElementById('createQuestionPlace');
 
             this.questionArr.forEach(question => {
+                // 創建一個專門放答案得陣列
+                let answerString = "該使用者未作答";
+                this.AllanswerArr.push(answerString)
                 // 創建問題的容器 div
                 const questionDiv = document.createElement('div');
                 // 添加問題標題
@@ -163,154 +120,204 @@ export default{
                     notionMustAnswer.textContent ="此題必填"
                     questionDiv.appendChild(notionMustAnswer);
                     notionMustAnswer.setAttribute('style', 'font-size: 10pt;color:red; margin: 0;');
+                    // this.MustBeAnswerNum++
+                        
                 }
                 // 拆分選項（假設選項以分號分隔）
                 const options = question.option.split(';');
                 for(let i =0 ; i<options.length;i++){
                     options[i] = (i+1)+"."+options[i]
                 }
-                // 遍歷選項，創建並添加選項到問題容器中
-                options.forEach(option => {
-                const label = document.createElement('label');
-                const input = document.createElement('input');
-                if(question.optionType=="單選"){
-                    input.setAttribute('type', 'radio'); //取決於 optionType
-                    input.setAttribute('value', option); //設定被勾選的value值
-                    var a = question.quid.toString();
-                    input.setAttribute('id', a); //設獨特的idkey
-                    input.setAttribute('name',a); //因為是單選所以名子要設定一樣只能有一個答案
-                    input.setAttribute('tagName',"單選"); 
-                    label.appendChild(document.createTextNode(option));
-                    if(question.necessary==true){
-                        input.setAttribute('required',true); //設獨特的idkey
-                    }
-                    
-                }
-                if(question.optionType=="多選"){
-                    input.setAttribute('type', 'checkbox'); // 取決於 optionType
-                    input.setAttribute('value', option); //設定被勾選的value值
-                    var a = question.quid.toString();
-                    input.setAttribute('id', a); //設獨特的idkey
-                    input.setAttribute('tagName',"多選"); 
-                    label.appendChild(document.createTextNode(option));
-                    if(question.necessary==true){
-                        input.setAttribute('required',true); //設獨特的idkey
-                    }
-                }
-                if(question.optionType=="文字回答"){
-                    input.setAttribute('type', 'textarea'); // 取決於 optionType
-                    input.setAttribute('style', 'width: 300px; height: 50px;resize: none;');
-                    input.setAttribute('rows', '5');
-                    input.setAttribute('cols', '33');
-                    var a = question.quid.toString();
-                    input.setAttribute('id', a); //設獨特的idkey
-                    input.setAttribute('tagName',"文字"); 
-                    if(question.necessary==true){
-                        input.setAttribute('required',true); //設獨特的idkey
-                    }
-                }
-                label.appendChild(input);
-                questionDiv.appendChild(label);
-                });
+
+
+                        // 遍歷選項，創建並添加選項到問題容器中
+                        options.forEach(option => {
+                        const label = document.createElement('label');
+                        const input = document.createElement('input');
+                        if(question.optionType=="單選"){
+                            input.setAttribute('type', 'radio'); //取決於 optionType
+                            input.setAttribute('value', option); //設定被勾選的value值
+                            var a = question.quid.toString();
+                            input.setAttribute('id', a); //設獨特的idkey
+                            input.setAttribute('name',a); //因為是單選所以名子要設定一樣只能有一個答案
+                            input.setAttribute('tagName',"單選"); 
+                            label.appendChild(document.createTextNode(option));
+
+
+                            if(question.necessary==true){
+                                input.setAttribute('required',true); 
+                            }
+                            input.setAttribute('required',false); 
+                            
+                        }
+                        if(question.optionType=="多選"){
+                            input.setAttribute('type', 'checkbox'); // 取決於 optionType
+                            input.setAttribute('value', option); //設定被勾選的value值
+                            var a = question.quid.toString();
+                            input.setAttribute('id', a); //設獨特的idkey
+                            input.setAttribute('tagName',"多選"); 
+                            // input.setAttribute('name',a); //因為是單選所以名子要設定一樣只能有一個答案
+                            label.appendChild(document.createTextNode(option));
+
+
+                            if(question.necessary==true){
+                                input.setAttribute('required',true);
+                            }
+                            input.setAttribute('required',false); 
+                        }
+                        if(question.optionType=="文字回答"){
+                            input.setAttribute('type', 'textarea'); // 取決於 optionType
+                            input.setAttribute('style', 'width: 300px; height: 50px;resize: none;');
+                            input.setAttribute('rows', '5');
+                            input.setAttribute('cols', '33');
+                            var a = question.quid.toString();
+                            input.setAttribute('id', a); //設獨特的idkey
+                            input.setAttribute('tagName',"文字"); 
+
+
+                            if(question.necessary==true){
+                                input.setAttribute('required',true);
+                            }
+                            input.setAttribute('required',false); 
+                        }
+                        label.appendChild(input);
+                        questionDiv.appendChild(label);
+
+
+                        });
+
                 // 將問題容器添加到整體容器中
                 createQuestionPlace.appendChild(questionDiv);
+                
             });
 
         },
+
         //生成確認答案===========================================================
         createCheckQuestion(){
 
+            // 創建各個答案的陣列
             var radioArr=[];
             var checkboxArr=[];
             var textArr=[];
-
-
+            //開始去尋找type為radio的答案
             const form = document.getElementById('createQuestionPlace');
-            const radioAnswers = {};
 
+
+
+//=======================================================================================
+            const radioAnswers = {};
             const radioInputs = form.querySelectorAll('input[type="radio"]:checked');
+
+
+
             radioInputs.forEach(input => {
                 const questionName = input.getAttribute('name');
                 const answer = input.value;
                 radioAnswers[questionName] = answer;
                 radioArr.push(answer)
             });
+
+
             console.log('單選按鈕作答答案：', radioAnswers);
             console.log(typeof radioAnswers);
-//==========================================================================================
-            const form1 = document.getElementById('createQuestionPlace');
+//========================================================================================
             const checkboxAnswers = {};
-
             const checkboxInputs = form.querySelectorAll('input[type="checkbox"]:checked');
+
+            const checkboxInputsArray = [...checkboxInputs];
+            console.log(typeof checkboxInputsArray)
+
             checkboxInputs.forEach(input => {
                 const questionName = input.getAttribute('name');
                 const answer = input.value;
 
+                
                 if (!checkboxAnswers[questionName]) {
                     checkboxAnswers[questionName] = [answer];
                 } else {
                     checkboxAnswers[questionName].push(answer);
                 }
+
                 checkboxArr.push(checkboxAnswers.null)
             });
+
+
             console.log('多選框作答答案：', checkboxAnswers.null);
-            console.log(typeof checkboxAnswers.null);
+            console.log(typeof checkboxAnswers);
             // 可以將答案進行其他處理或儲存
 //==========================================================================================
-            const form2 = document.getElementById('createQuestionPlace');
                 const textAnswers = {};
-
                 const textInputs = form.querySelectorAll('input[type="textarea"]');
+
+
                 textInputs.forEach(input => {
                     const questionName = input.getAttribute('name');
                     const answer = input.value;
                     textAnswers[questionName] = answer;
                     textArr.push(answer)
                 });
+
+
                 console.log('文字輸入框作答答案：', textArr);
                 console.log(typeof textArr);
-                // 可以將答案進行其他處理或儲存
 
             
 
 
 
 
-            // 必填檢查碼
-            var Must = 0 ;
             // 將問題和選項生成到此元素中
             const checkQuestionPlace = document.getElementById('checkQuestionPlace');
+            
+            var AllanswerArrIndex = 0;
             // 遍歷問題列表
             this.questionArr.forEach(question => {
 
+                    //設定一個空字串來裝答案
                     var answer = "";
                     // 創建問題的容器 div
                     const questionDiv = document.createElement('div');
                     if(question.optionType=="單選"){
                         answer =radioArr[0]
-                        this.AllanswerArr.push(answer)
+                        if(answer!=null){
+                            this.AllanswerArr[AllanswerArrIndex]=answer
+                        }
+                        if(answer==null){
+                            this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
+                            answer="該使用者未作答"
+                        }
                         if(question.necessary==true&&answer==null){
-                            Must++
-                            return
+                            this.MustBeAnswerNum++
                         }
                     }
                     if(question.optionType=="多選"){
                         let answerArr = checkboxArr[0] 
-                        answerArr.forEach(element => {
-                            answer=answer+element
-                        });
-                        this.AllanswerArr.push(answer)
-                        if(question.necessary==true&&answer==null){
-                            Must++
-                            return
+                        if(answerArr!=null){
+                            answerArr.forEach(input => {
+                                answer=answer+input+";"
+                            });
+                            this.AllanswerArr[AllanswerArrIndex]=answer
+                        }
+                        if(answerArr==null){
+                            this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
+                            answer="該使用者未作答"
+                        }
+                        if(question.necessary==true&&answerArr==null){
+                            this.MustBeAnswerNum++
                         }
                     }
                     if(question.optionType=="文字回答"){
                         answer =textArr[0]
-                        this.AllanswerArr.push(answer)
-                        if(question.necessary==true&&answer==null){
-                            Must++
-                            return
+                        if(answer!=""){
+                            this.AllanswerArr[AllanswerArrIndex]=answer
+                        }
+                        if(answer==""){
+                            this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
+                            answer="該使用者未作答"
+                        }
+                        if(question.necessary==true&&answer==""){
+                            this.MustBeAnswerNum++
                         }
                     }
 
@@ -318,8 +325,8 @@ export default{
                     const questionTitle = document.createElement('p');
                     questionTitle.textContent =question.quid+"."+ question.qtitle;
                     const questionAnswer = document.createElement('p');
-                    questionAnswer.textContent = answer
 
+                    questionAnswer.textContent = answer
                     questionTitle.setAttribute('style', 'font-size: 16pt;font-weight: bold;'); //小問題設定字型大小
                     questionDiv.appendChild(questionTitle);
                     questionDiv.appendChild(questionAnswer);
@@ -327,6 +334,7 @@ export default{
                     // 將問題容器添加到整體容器中
                     checkQuestionPlace.appendChild(questionDiv);
                     
+                    //判斷問題狀態是什麼把相對應陣列裡面得數字刪掉
                     if(question.optionType=="單選"){
                         radioArr.splice(0,1)
                     }
@@ -336,12 +344,14 @@ export default{
                     if(question.optionType=="文字回答"){
                         textArr.splice(0,1)
                     }
+
+                    AllanswerArrIndex++
                 });
-                if(Must!=0){
-                    this.MustBeAnswerNum++;
-                }
+
         },
-        // //新增答案是後台
+
+
+        // //新增答案到後台
         addUserAnswer(){
                 let i = 0 ;
                 this.questionArr.forEach(question => {
@@ -371,6 +381,8 @@ export default{
                     .then((response) => console.log("Success:", response));
                     i++
                 });
+
+                this.$router.push("./")
                 
         },
         // pinya執行方法獲得方法
@@ -404,6 +416,7 @@ export default{
     unmounted(){
         this.fromPinyaQn  = [];
         this.questionArr  = [];
+        this.MustBeAnswerNum =0;
     },
     updated(){
         // console.log(this.isPublishedQnArr)
