@@ -35,6 +35,9 @@ export default{
     components:{
     },
     methods:{
+        gohomePage(){
+            this.$router.push("./")
+        },
         // 特效提示框基本資料沒填
         specialNotion12(){
             Swal.fire({
@@ -96,7 +99,6 @@ export default{
             });
             
         },
-
 
         //生成作答問題===========================================================
         createQuestion(){
@@ -350,7 +352,6 @@ export default{
 
         },
 
-
         // //新增答案到後台
         addUserAnswer(){
                 let i = 0 ;
@@ -443,8 +444,10 @@ export default{
             <div id="createQuestionPlace" class="questionPlace">
             </div>
         </div>
-
-        <button @click="goconfirm" type="button">提交並且前往確認</button>
+            <div style="display: flex;" class="botBtn">
+                <button @click="gohomePage" type="button">回首頁</button>
+                <button @click="goconfirm" type="button">提交並且前往確認</button>
+            </div>
     </div>
     <div v-show="page==2" class="bg2">  
         <h1>請確認問卷</h1>
@@ -459,7 +462,7 @@ export default{
             <div id="checkQuestionPlace" class="checkquestionPlace">
             </div>
         </div>
-        <div class="botBtn">
+        <div  class="botBtn">
             <button @click="backconfirm" type="button">返回更改答案</button>
             <button @click="addUserAnswer" type="button">新增你的答案</button>
         </div>

@@ -26,7 +26,7 @@ export default{
         RouterLink
     },
     methods:{
-        // 特效提示框
+        // 特效提示框-不能更新
         specialNotion(){
             Swal.fire({
                 title: '不能更新!',
@@ -35,6 +35,16 @@ export default{
                 confirmButtonText: 'ok'
                 })
         },
+        // 特效提示框-不能刪除
+        specialNotion1(){
+            Swal.fire({
+                title: '不能刪除!',
+                text: '請看時間',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        
         //判斷時間是不是已經到了問卷要出版了
         checkedQnShouldPublished(){
             var checkDataPublished =[]
@@ -80,13 +90,13 @@ export default{
             //先去算索引值數字
             var pagekey = (this.perpage*(this.currentPage-1))+index
 
-            const stDay =new Date(this.allQuestionnaire[pagekey].startDate)
-            const edDay =new Date(this.allQuestionnaire[pagekey].endDate)
-            const nDay  =new Date(this.nowday)
-            if(nDay>edDay || nDay>=stDay){
-                this.specialNotion();
-                return
-            }
+            // const stDay =new Date(this.allQuestionnaire[pagekey].startDate)
+            // const edDay =new Date(this.allQuestionnaire[pagekey].endDate)
+            // const nDay  =new Date(this.nowday)
+            // if(nDay>edDay || nDay>=stDay){
+            //     this.specialNotion();
+            //     return
+            // }
 
             var editId = this.allQuestionnaire[pagekey].id
             this.seteditQuestionnaire(editId)
@@ -168,14 +178,14 @@ export default{
                 const NNdate = new Date(this.nowday);
                 if(this.allQuestionnaire[data1[w]].published == true && NNdate>=SSdate){
                     stopDel=true;
-                    alert("你刪除的問卷當中有包含已開始的問卷所以禁止刪除");
+                    this.specialNotion1();
                     return stopDel;
                 }
             };
 
             
             if(stopDel){
-                alert("當中包含已出版且已經開始的問卷")
+                this.specialNotion1();
                 this.indexArr=[];
                 return 
             }

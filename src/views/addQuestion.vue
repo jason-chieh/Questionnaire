@@ -1,12 +1,17 @@
 <script>
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
+import Swal from 'sweetalert2'
 
 export default{
     data(){
         return{
             // 拿到全部問卷
             allQuestionnaire:[],
+            //作答人的資料
+            allUserData:[],
+            //作答人資料處理過只有一筆使用者
+            allUserDataProcess:[],
             allQnQu:[],
             //拿到最新問卷的id
             lastestId:0,
@@ -40,22 +45,79 @@ export default{
             editIndex:0,  //單一問題的索引值
 
             updateNum:-1,
-            editNum:0
+            editNum:0,
+            seeUserNum:0,
+            //綁定及時的姓名,年紀，信箱，手機
+            answerName:"",
+            answerPhone:"",
+            answerEmail:"",
+            answerAge:"",
+            answerTime:"時間",
         }
     },
     methods:{
+        // 特效提示框-更新失敗
+        specialNotion1(){
+            Swal.fire({
+                title: '不能更新!',
+                text: '請更新未發佈或是未開始~',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        // 特效提示框-更新成功
+        specialNotion(){
+            Swal.fire({
+                position: "mid-center",
+                icon: "success",
+                title: "Your work has been saved",
+                showConfirmButton: false,
+                timer: 1500
+                });
+        },
         goCheckPage(){
             this.createQuestion();
             this.allQnQu.length==0 ? this.page=2.5:this.page=2.6
 
         },
+        seeuserAnswer(name){
+            this.seeUserNum++
+            var userAnswer = []
+            //去把那個人的答案抓出來
+            this.allUserData.forEach(item=>{
+                if(item.name==name){
+                    userAnswer.push(item)
+                }
+            })
+            this.createQuestion(userAnswer);
+            this.page=2.7
+        },
         goCalCircle(){
             this.page=4
         },
         goPeople(){
+            this.seeUserNum=0
+            if(this.allUserData.length!=0){
+                //處理作答人資料
+                this.allUserDataProcess = this.allUserData
+                //把相同的流到剩下一個
+                let uniqueArray = this.allUserDataProcess.filter((obj, index, self) => 
+                    index === self.findIndex((t) => (
+                        t.name === obj.name
+                    ))
+                );
+                this.allUserDataProcess = uniqueArray
+            }
+            this.delCheckParamQuestion()
             this.page=3
         },
         goQuestion(){
+            this.seeUserNum=0
+            this.answerName="",
+            this.answerPhone="",
+            this.answerEmail="",
+            this.answerAge="",
+            this.answerTime="時間",
             this.delCheckParamQuestion();
             this.page=2
         },
@@ -90,16 +152,28 @@ export default{
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
             
+            this.specialNotion();
             this.$router.push("/backView")
         },
         // 從確認頁前往後端新增
         gotobackAndAdd(){
             this.addquestionnaire();
+            this.specialNotion();
             this.$router.push("/backView")
         },
         // 從確認頁前往後端更新
         gotobackAndUpdate(){
+            
+            const stDay =new Date(this.questionnaireStartDate)
+            const edDay =new Date(this.questionnaireEndDate)
+            const nDay  =new Date(this.nowday)
+            if(nDay>edDay || nDay>=stDay){
+                this.specialNotion1();
+                return
+            }
+
             this.updatequestionnaire();
+            this.specialNotion();
             this.$router.push("/backView")
         },
         //前往單一問題的編輯頁
@@ -264,10 +338,85 @@ export default{
 
             })
         },
+        //前往後端抓作答人資料
+        searchUserData(){
+                const url = 'http://localhost:8081/api/quiz/searchUserPeople';
+            // 要帶入的值
+            const queryParams = new URLSearchParams({
+                qnidid:this.updateNum
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.allUserData = data;
+            this.allUserData = this.allUserData.userList;
+            this.allUserData = this.allUserData.reverse();
+            console.log(this.allUserData)
+            
+            // this.lastestId = (this.allQuestionnaire[0].id)+1;
+            // console.log(this.allQuestionnaire)
+
+            })
+        },
 
 
         //生成確認問題
-        createQuestion(){
+        createQuestion(userAnswer){
+            //這是觀看使用者紀錄
+            if(this.seeUserNum!=0){
+                console.log(userAnswer)
+                // 遍歷問題列表
+                this.question_list.forEach(question => {
+                    const createQuestionPlace = document.getElementById('createQuestionPlace');
+                    // 創建問題的容器 div
+                    const questionDiv = document.createElement('div');
+                    // 添加問題標題
+                    const questionTitle = document.createElement('p');
+                    questionTitle.textContent =question.quid+"."+ question.qtitle;
+                    const questionAnswer = document.createElement('p');
+
+                    var b;
+                    userAnswer.forEach(qu => {
+                        if(question.quid==qu.qid){
+                            b = qu.ans 
+                            this.answerName = qu.name
+                            this.answerPhone = qu.phoneNumber
+                            this.answerEmail = qu.email
+                            this.answerAge = qu.age
+                            this.answerTime = qu.dateTime
+                        }
+                    });
+                    questionAnswer.textContent = b 
+                    questionTitle.setAttribute('style', 'font-size: 16pt;font-weight: bold;'); //小問題設定字型大小
+                    questionDiv.appendChild(questionTitle);
+                    questionDiv.appendChild(questionAnswer);
+                    // 將問題容器添加到整體容器中
+                    createQuestionPlace.appendChild(questionDiv);
+                    
+
+                });
+                return
+            }
+                
+            
+
+
+
         
             // 將問題和選項生成到此元素中
             const createQuestionPlace = document.getElementById('createQuestionPlace');
@@ -277,8 +426,6 @@ export default{
             if(question.option=="null"){
 
             }
-            // 如果問題標題不為空
-            if (question.qtitle.trim() !== '') {
                 // 創建問題的容器 div
                 const questionDiv = document.createElement('div');
 
@@ -318,7 +465,6 @@ export default{
 
                 // 將問題容器添加到整體容器中
                 createQuestionPlace.appendChild(questionDiv);
-            }
             });
 
         },
@@ -365,6 +511,11 @@ export default{
         this.updateNum = x;
         
         if(x!=-1){
+            //先去抓作答資料
+            this.searchUserData();
+
+
+
             this.editNum=x;
             // console.log(this.lastestId)
             const arr = this.allQuestionnaireA.quizVoList
@@ -396,8 +547,8 @@ export default{
     },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
-        // console.log(this.indexArr)
-        // console.log(allQuestionnaireA)
+        // console.log(this.updateNum)
+        // console.log(this.question_list)
     }
 }
 </script>
@@ -474,17 +625,18 @@ export default{
                 </div>
             </div>
             <!-- 確認頁面表 -->
-            <div v-show="page==2.5||page==2.6" class="checkPage">
+            <div v-show="page==2.5||page==2.6||page==2.7" class="checkPage">
+                <h2>{{this.answerTime}}</h2>
                 <h1>{{this.questionnaireName}}</h1>
                 <p style="font-weight: bold;">內容:{{this.questionnaireContent}}</p>
                 <label for="">姓名:</label>
-                <input type="text"><br>
+                <input v-model="this.answerName" type="text"><br>
                 <label for="">手機:</label>
-                <input type="text"><br>
+                <input v-model="this.answerPhone" type="text"><br>
                 <label for="">信箱:</label>
-                <input type="text"><br>
-                <label for="">年齡:</label>
-                <input type="text">
+                <input v-model="this.answerEmail" type="text"><br>
+                <label for="">年紀:</label>
+                <input v-model="this.answerAge" type="text">
                 <div id="createQuestionPlace" class="questionPlace">
                         
 
@@ -492,6 +644,24 @@ export default{
             </div>
             <!-- 問卷回饋的人 -->
             <div v-if="page==3" class="questionPeople">
+                    <table>
+                            <thead>
+                                <tr>
+                                    <th>編號</th>
+                                    <th>姓名</th>
+                                    <th>填寫時間</th>
+                                    <th>觀看回復</th>
+                                </tr>
+                            </thead>
+                        <tbody>
+                            <tr v-for="item,index in allUserDataProcess">
+                                <td >{{item.num}}</td>
+                                <td>{{item.name}}</td>
+                                <td>{{item.dateTime}}</td>
+                                <td><a  href="#" @click="seeuserAnswer(item.name)" :key="index" >觀看回復</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
             </div>
             <!-- 統計圖表 -->
             <div v-if="page==4" class="circleCal">
@@ -712,6 +882,12 @@ $maincolor2:rgb(218, 218, 218);
             padding-left: 10vw;
             overflow: auto;
             background-color: white;
+            position: relative;
+            h2{
+                top: 5%;
+                left: 70%;
+                position: absolute;
+            }
             h1{
                 width: 50vw;
             }
@@ -731,9 +907,28 @@ $maincolor2:rgb(218, 218, 218);
         }
         // 問卷回饋的人
         .questionPeople{
-            width: 90vw;
-            height: 60vh;
-            background-color: pink;
+            min-height: 55vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 2% 2%;
+                table {
+                        width: 60vw;
+                        border-collapse: collapse;
+                        background-color: rgb(141, 141, 228);
+                    }
+                    tbody{
+                        min-height: 40vh;
+                    }
+                    th, td {
+                        border: 1px solid black;
+                        padding: 10px;
+                        text-align: center;
+                    }
+                    th {
+                        background-color: rgb(187, 186, 186);
+                    }
         }
         // 統計圖表
         .circleCal{
