@@ -387,7 +387,7 @@ export default{
                 
         },
         // pinya執行方法獲得方法
-        ...mapActions(day,["getTellVoteWhichOne","searchAllQnIsPublished","getfromPinyaQn","getquestionArr","setquestionArr"]),
+        ...mapActions(day,["getTellVoteWhichOne","getfromPinyaQn","getquestionArr"]),
     },
     computed:{
         // 抓取pinia裡面的已出版問卷
@@ -402,8 +402,6 @@ export default{
 
     },
     mounted(){
-        // // 告訴pinya我要以出版的問卷
-        // this.searchAllQnIsPublished();
 
         this.fromPinyaQn  = this.getfromPinyaQn();
         this.questionArr  = this.getquestionArr();

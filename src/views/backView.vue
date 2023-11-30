@@ -313,7 +313,7 @@ export default{
     },
     updated(){
         // console.log(this.indexArr)
-        // console.log(this.currentPage)
+        // console.log(allQuestionnaireA)
     },
 
     computed:{
@@ -384,7 +384,7 @@ export default{
                             <td >{{getPublishedStatus(item.published, item.startDate,item.endDate )}}</td>
                             <td>{{item.startDate}}</td>
                             <td>{{item.endDate}}</td>
-                            <td :key="index" ><a  @click="gocal(index)" href="#">統計連結</a></td>
+                            <td :key="index" ><a :key="index"  @click="" href="#">統計連結</a></td>
                         </tr>
                         <!-- 可以继续添加更多的行 -->
                     </tbody>

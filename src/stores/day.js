@@ -9,10 +9,14 @@ export default defineStore("day",{
         editQuestionnaire:0,
         //全域變數告訴投票頁面是邸幾個問卷
         tellVoteWhichOne:0,
+        //全域變數告訴圓形圖頁面是第幾個問卷
+        tellCircleWhichOne:0,
         // 從pinya拿到home給我們的問卷標題
         fromPinyaQn:[],
         //從方法拿到的問卷小問題們
         questionArr:[],
+        //從方法拿到作答的使用者們
+        allUserDataPinia:[]
         
     }),
     getters:{
@@ -124,6 +128,8 @@ export default defineStore("day",{
                 this.isPublishedQnArr = data;
                 })
         },
+
+
         //去抓看到底是哪張問卷要投票生成
         async prepareVote(){
             const a =this.getTellVoteWhichOne()
@@ -167,23 +173,55 @@ export default defineStore("day",{
         },
 
 
+        //前往後端抓作答人資料
+        async searchUserDataP(){
+            const w =this.gettellCircleWhichOne();
+
+            const url = 'http://localhost:8081/api/quiz/searchUserPeople';
+            // 要帶入的值
+            const queryParams = new URLSearchParams({
+                qnidid:w
+            });
+
+            // 將查詢字串附加到 URL
+            const urlWithParams = `${url}?${queryParams}`;
+
+            await fetch(urlWithParams, {
+            method: "GET", 
+            headers: new Headers({
+                "Accept":"application/json",
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin":"*"
+            }),
+            })
+            .then(response => {
+            // 將API回應轉換為JSON格式
+            return response.json();
+            })
+            .then(data => {
+            // 將API回應的JSON數據設置到組件的responseData數據屬性中
+            this.allUserDataPinia = data;
+
+            })
+        },
+
+
 // ===========================================================================get and set===================================
 
-        //告訴新增問題說這次是要編輯-------------------------
+        //告訴新增問題說這次是要編輯============================================
         geteditQuestionnaire(){
             return this.editQuestionnaire
         },
         seteditQuestionnaire(num){
             this.editQuestionnaire = num ;
         },
-        //告訴投票頁面是哪個問卷要create------------------------
+        //告訴投票頁面是哪個問卷要create=========================================fromPinyaQn
         getTellVoteWhichOne(){
             return this.tellVoteWhichOne
         },
         setTellVoteWhichOne(num){
             this.tellVoteWhichOne = num ;
         },
-
         //告訴投票頁面是哪個問卷標題
         getfromPinyaQn(){
             return this.fromPinyaQn
@@ -197,6 +235,18 @@ export default defineStore("day",{
         },
         setquestionArr(num){
             this.questionArr = num ;
+        },
+
+
+        //告訴圓形圖頁面是哪個問卷=================================================
+        gettellCircleWhichOne(){
+            return this.tellCircleWhichOne
+        },
+        settellCircleWhichOne(num){
+            this.tellCircleWhichOne = num ;
+        },
+        getCircleArr(){
+            return  this.allUserDataPinia
         },
 
 

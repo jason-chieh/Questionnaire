@@ -32,28 +32,36 @@ export default{
                 confirmButtonText: 'ok'
                 })
         },
-        gocal(){
-        this.$router.push("/CalView")
+        gocal(index){
+            var Fkey = this.perpage*(this.currentPage-1)+index
+            this.settellCircleWhichOne(this.allQuestionnaire[Fkey].id);
+
+
+
+            this.searchUserDataP().then(() => {
+                // 確保在導航之前所有非同步操作都已完成
+                this.$router.push("/CalView")
+            });
         },
         gotovote(index){
-        let key = this.perpage*(this.currentPage-1)+index
-        this.setTellVoteWhichOne(this.allQuestionnaire[key].id);
+            let key = this.perpage*(this.currentPage-1)+index
+            this.setTellVoteWhichOne(this.allQuestionnaire[key].id);
 
-        const stDay =new Date(this.allQuestionnaire[key].startDate)
-        const edDay =new Date(this.allQuestionnaire[key].endDate)
-        const nDay  =new Date(this.nowday)
-        if(nDay>edDay || nDay<stDay){
-            this.specialNotion()
-            return
-        }
+            const stDay =new Date(this.allQuestionnaire[key].startDate)
+            const edDay =new Date(this.allQuestionnaire[key].endDate)
+            const nDay  =new Date(this.nowday)
+            if(nDay>edDay || nDay<stDay){
+                this.specialNotion()
+                return
+            }
 
 
-        this.prepareVote().then(() => {
-        // 確保在導航之前所有非同步操作都已完成
-        this.$router.push("/vote");
-        });
-        // this.prepareVote();
-        // this.$router.push("/vote")
+            this.prepareVote().then(() => {
+            // 確保在導航之前所有非同步操作都已完成
+            this.$router.push("/vote");
+            });
+                // this.prepareVote();
+                // this.$router.push("/vote")
         },
         // 後端抓取問卷抓取已出版的
         searchAllQn(){
@@ -111,8 +119,18 @@ export default{
             return "進行中";
             
         },
+        //判斷文字顏色
+        isStartDatePast(startDate,endDate) {
+            const SSdate = new Date(startDate);
+            const EEdate = new Date(endDate);
+            const NNdate = new Date(this.nowday);
+            if (NNdate < SSdate||NNdate > EEdate) {
+                return false;
+            }
+            return true;
+        },
         // pinya執行方法獲得日期
-        ...mapActions(day,["getCurrentDate","searchAllQna","setTellVoteWhichOne","searchAllQnIsPublished","prepareVote"]),
+        ...mapActions(day,["getCurrentDate","searchAllQna","setTellVoteWhichOne","searchAllQnIsPublished","prepareVote","settellCircleWhichOne","searchUserDataP"]),
     },
 
     mounted(){
@@ -198,10 +216,10 @@ export default{
                     <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
                         <td >{{item.id}}</td>
                         <td ><a :key="index" @click="gotovote(index)" href="#">{{item.title}}1</a></td>
-                        <td>{{getPublishedStatus(item.startDate,item.endDate )}}</td>
+                        <td >{{getPublishedStatus(item.startDate,item.endDate )}}</td>
                         <td>{{item.startDate}}</td>
                         <td>{{item.endDate}}</td>
-                        <td :key="index" ><a @click="gocal(index)" href="#">統計連結</a></td>
+                        <td :key="index" ><a :key="index" @click="gocal(index)" href="#">統計連結</a></td>
                     </tr>
                     <!-- 可以继续添加更多的行 -->
                 </tbody>
@@ -339,5 +357,9 @@ flex-direction: column;
             }
         }
     }
+}
+
+.highlighted {
+    color: red;
 }
 </style>

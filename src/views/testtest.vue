@@ -2,6 +2,7 @@
 import { sassNull } from 'sass';
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
+import Chart from 'chart.js/auto';
 
 
 export default{
@@ -159,6 +160,64 @@ export default{
             console.error('找不到指定的 div 元素');
 }
         },
+        renderPieChart() {
+            const ctx = this.$refs.myPieChart;
+            if (ctx) {
+                    new Chart(ctx, {
+                            type: 'pie',
+                            data: {
+                            labels: ['A', 'B', 'C', 'D'],
+                            datasets: [{
+                            data: [10, 20, 30, 40],
+                            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                            }]
+                    },
+                    options: {
+                        // 在这里可以设置图表的一些选项，例如标题、样式等
+                    }
+                });
+            }
+        },
+        testtest(){
+                // 创建canvas元素
+                    const canvas = document.createElement('canvas');
+                    canvas.id = 'myPieChart';
+                    canvas.width = 400;
+                    canvas.height = 400;
+
+                    // 检查是否成功创建了canvas元素
+                    if (canvas.getContext) {
+                        const ctx = canvas.getContext('2d');
+
+                        // 将canvas添加到一个容器中
+                        document.getElementById('chartContainer').appendChild(canvas);
+
+                        // 图表数据
+                        const data = {
+                            labels: ['A', 'B', 'C', 'D'],
+                            datasets: [{
+                                data: [10, 20, 30, 40],
+                                backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
+                            }]
+                        };
+
+                        // 图表选项
+                        const options = {
+                            // 在这里添加你的图表选项
+                        };
+
+                        // 创建新的Chart实例
+                        new Chart(ctx, {
+                            type: 'pie',
+                            data: data,
+                            options: options
+                        });
+                    } else {
+                        // 浏览器不支持Canvas
+                        console.error('当前浏览器不支持Canvas。');
+                    }
+
+        },
         increment() {
             this.$store.commit('increment')
             console.log(this.$store.state.count)
@@ -170,6 +229,11 @@ export default{
         this.searchAllQna();
         console.log("ssssss")
         console.log(this.aaa)
+
+        this.renderPieChart()
+
+
+        
     },
     beforeMount(){
     
@@ -191,15 +255,18 @@ export default{
         <button type="submit" @click="createQ" id="btn">新增問題</button>
         <button type="submit" @click="delete231" id="btn">新增問題</button>
         <button type="submit" @click="goBackDelQn" id="btn">後臺山問卷</button>
-        <button type="submit" @click="" id="btn">vuex練習</button>
+        <button style="width: 50px;height: 50px;" type="submit" @click="" id="btn">vuex練習</button>
     </div>
-    <div id="question-container" class="question-cont">
+    <div id="question-container" style="width: 50px;height: 50px;" class="question-cont">
     </div>
 
 
     
+   <div id="chartContainer" class="chartContaineree">
 
-    
+   </div>
+
+    <canvas ref="myPieChart" width="100" height="100"></canvas>
 </template>
 
 <style lang="scss" scoped>
@@ -209,6 +276,11 @@ export default{
     width: 200px;
     height: 200px;
     background-color: pink;
+}
+.aaaaa{
+    width: 200px;
+    height: 200px;
+
 }
 </style>
 
