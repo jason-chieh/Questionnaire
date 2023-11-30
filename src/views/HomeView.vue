@@ -215,7 +215,7 @@ export default{
                 <tbody>
                     <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
                         <td >{{item.id}}</td>
-                        <td ><a :key="index" @click="gotovote(index)" href="#">{{item.title}}1</a></td>
+                        <td ><a :key="index" @click="gotovote(index)" href="#">{{item.title}}</a></td>
                         <td >{{getPublishedStatus(item.startDate,item.endDate )}}</td>
                         <td>{{item.startDate}}</td>
                         <td>{{item.endDate}}</td>

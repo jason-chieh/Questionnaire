@@ -40,6 +40,7 @@ export default{
                 // 創建問題的容器 div 並且設定樣式
                 const LeftQuestionDiv = document.createElement('div');
                 LeftQuestionDiv.setAttribute("class","LeftQuestionDiv")
+                LeftQuestionDiv.setAttribute("style","padding: 2% 2%;")
                 const questionDiv = document.createElement('div');
                 questionDiv.setAttribute('style', 'min-height:50vh;min-width:70vh;margin-bottom: 5vh;background-color:pink;display: flex;'); 
                 // 添加問題標題
@@ -58,7 +59,7 @@ export default{
 
                 // 新增一個答案show出區
                 const questionAnswer = document.createElement('div');
-                questionAnswer.setAttribute('style', 'height:40vh;width:50vh;background-color:gray;overflow: auto')
+                questionAnswer.setAttribute('style', 'height:40vh;width:50vh;overflow: auto')
                 questionAnswer.setAttribute('id', question.quid)
 
 
@@ -149,7 +150,7 @@ export default{
 
                         // 將答案區右邊放進div
                         const RightQuestionDiv = document.createElement('div');
-                        RightQuestionDiv.setAttribute('style', 'width:22vw;border: 1px solid black;')
+                        RightQuestionDiv.setAttribute('style', 'width:22vw;')
                         RightQuestionDiv.setAttribute('class', 'RightQuestionDiv')
                         questionDiv.appendChild(RightQuestionDiv);  
 
@@ -309,7 +310,7 @@ export default{
     align-items: center;
     flex-direction: column;
 
-    
+
     .showBlock{
     width: 80vw;
     min-height: 80vh;

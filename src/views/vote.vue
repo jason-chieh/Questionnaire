@@ -148,8 +148,9 @@ export default{
 
                             if(question.necessary==true){
                                 input.setAttribute('required',true); 
+                                console.log("你好")
                             }
-                            input.setAttribute('required',false); 
+                            // input.setAttribute('required',false); 
                             
                         }
                         if(question.optionType=="多選"){
@@ -164,8 +165,9 @@ export default{
 
                             if(question.necessary==true){
                                 input.setAttribute('required',true);
+                                console.log("你好")
                             }
-                            input.setAttribute('required',false); 
+                            // input.setAttribute('required',false); 
                         }
                         if(question.optionType=="文字回答"){
                             input.setAttribute('type', 'textarea'); // 取決於 optionType
@@ -179,8 +181,9 @@ export default{
 
                             if(question.necessary==true){
                                 input.setAttribute('required',true);
+                                console.log("你好")
                             }
-                            input.setAttribute('required',false); 
+                            // input.setAttribute('required',false); 
                         }
                         label.appendChild(input);
                         questionDiv.appendChild(label);
@@ -285,12 +288,12 @@ export default{
                         if(answer!=null){
                             this.AllanswerArr[AllanswerArrIndex]=answer
                         }
+                        if(question.necessary==true&&answer==null){
+                            this.MustBeAnswerNum++
+                        }
                         if(answer==null){
                             this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
                             answer="該使用者未作答"
-                        }
-                        if(question.necessary==true&&answer==null){
-                            this.MustBeAnswerNum++
                         }
                     }
                     if(question.optionType=="多選"){
@@ -301,12 +304,12 @@ export default{
                             });
                             this.AllanswerArr[AllanswerArrIndex]=answer
                         }
+                        if(question.necessary==true&&answerArr==null){
+                            this.MustBeAnswerNum++
+                        }
                         if(answerArr==null){
                             this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
                             answer="該使用者未作答"
-                        }
-                        if(question.necessary==true&&answerArr==null){
-                            this.MustBeAnswerNum++
                         }
                     }
                     if(question.optionType=="文字回答"){
@@ -314,12 +317,12 @@ export default{
                         if(answer!=""){
                             this.AllanswerArr[AllanswerArrIndex]=answer
                         }
+                        if(question.necessary==true&&answer==""){
+                            this.MustBeAnswerNum++
+                        }
                         if(answer==""){
                             this.AllanswerArr[AllanswerArrIndex]="該使用者未作答"
                             answer="該使用者未作答"
-                        }
-                        if(question.necessary==true&&answer==""){
-                            this.MustBeAnswerNum++
                         }
                     }
 
@@ -418,7 +421,7 @@ export default{
         this.MustBeAnswerNum =0;
     },
     updated(){
-        // console.log(this.isPublishedQnArr)
+        console.log(this.thisQnNumber)
         // console.log(this.AllanswerArr)
     }
 }
