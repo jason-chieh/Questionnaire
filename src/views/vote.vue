@@ -35,6 +35,16 @@ export default{
     components:{
     },
     methods:{
+        // 特效提示框-成功新增
+        specialNotion(){
+            Swal.fire({
+                position: "mid-center",
+                icon: "success",
+                title: "讚啦",
+                showConfirmButton: false,
+                timer: 1500
+                });
+        },
         gohomePage(){
             this.$router.push("./")
         },
@@ -386,6 +396,7 @@ export default{
                     i++
                 });
 
+                this.specialNotion();
                 this.$router.push("./")
                 
         },
