@@ -26,6 +26,16 @@ export default{
         RouterLink
     },
     methods:{
+        // 特效提示框-成功新增
+        specialNotion100(){
+            Swal.fire({
+                position: "mid-center",
+                icon: "success",
+                title: "讚啦",
+                showConfirmButton: false,
+                timer: 1500
+                });
+        },
         // 特效提示框-不能更新
         specialNotion(){
             Swal.fire({
@@ -76,8 +86,16 @@ export default{
 
         },
         //跳轉頁面們
-        gocal(){
-        this.$router.push("/CalView")
+        backGoCal(index){
+            var wkey = this.perpage*(this.currentPage-1)+index
+            this.settellCircleWhichOne(this.allQuestionnaire[wkey].id);
+
+
+
+            this.searchUserDataP().then(() => {
+                // 確保在導航之前所有非同步操作都已完成
+                this.$router.push("/CalView")
+            });
         },
         gotovote(){
         this.$router.push("/vote")
@@ -216,7 +234,7 @@ export default{
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
             this.indexArr=[];
-
+            this.specialNotion100();
 
         },
         // 前往後端  更新  整個問卷加上問題
@@ -262,6 +280,13 @@ export default{
                 return "進行中";
             }
         },
+        //判斷文字顏色
+        isStartDatePast(published) {
+            if (published) {
+                return true;
+            }
+            return false;
+        },
         // 點選checkbox會把陣列object化可以去判斷第幾頁第幾個checkbox
         addNumInIndexArr(index){
             let obj ={
@@ -282,7 +307,7 @@ export default{
 
         },
         // 執行方法獲得日期 還有 設定編輯問卷的代碼
-        ...mapActions(day,["getCurrentDate","seteditQuestionnaire","searchAllQna","searchAllQnIsPublished"]),
+        ...mapActions(day,["getCurrentDate","seteditQuestionnaire","searchAllQna","searchAllQnIsPublished","searchUserDataP","settellCircleWhichOne"]),
     },
     mounted(){
         // // 抓取日期
@@ -306,7 +331,7 @@ export default{
     unmounted(){
         // pinya收尋後端問卷
         this.searchAllQna();    
-        //離開的時候必須去檢查問卷時間是否到期然後要出版
+        //離開的時候必須去檢查問卷時間是否到期然後要出版------------------------------
         this.checkedQnShouldPublished();
 
 
@@ -381,10 +406,10 @@ export default{
                             <td ><input type="checkbox"  v-model="item.checked" @click="addNumInIndexArr(index)" ></td>
                             <td >{{item.id}}</td>
                             <td ><a :key="index" :id="this.currentPage+'-'+index" @click="gotoEditQuestion(index)" href="#">{{item.title}}</a></td>
-                            <td >{{getPublishedStatus(item.published, item.startDate,item.endDate )}}</td>
+                            <td :class="{'redShow': isStartDatePast(item.published), 'greenShow': !isStartDatePast(item.published)}">{{getPublishedStatus(item.published, item.startDate,item.endDate )}}</td>
                             <td>{{item.startDate}}</td>
                             <td>{{item.endDate}}</td>
-                            <td :key="index" ><a :key="index"  @click="" href="#">統計連結</a></td>
+                            <td :key="index" ><a :key="index"  @click="backGoCal(index)" href="#">統計連結</a></td>
                         </tr>
                         <!-- 可以继续添加更多的行 -->
                     </tbody>
@@ -553,4 +578,13 @@ $maincolor:#00A9FF;
         }
     }
 }
+
+.greenShow {
+    color: green; /* 设置绿色 */
+}
+
+.redShow {
+    color: red; /* 设置红色 */
+}
+
 </style>

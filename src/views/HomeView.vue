@@ -17,12 +17,19 @@ export default{
         searchText:"",
         searchStartDate: "",
         searchEndDate:"",
+
+
+        testNum:1231
         }
     },
     components:{
         
     },
     methods:{
+        testt(){
+            // const value = this.testNum
+            // this.$router.push('/testtest/value');
+        },
         // 特效提示框
         specialNotion(){
             Swal.fire({
@@ -197,6 +204,7 @@ export default{
             </div>
             <div class="searchBlockRight">
                 <button @click="searchAllQn()" class="search bb" type="button">search</button>
+                <!-- <button @click="testt()" class="search bb" type="button"></button> -->
             </div>
         </div>
         <!-- 問卷修出內容 -->
@@ -216,7 +224,7 @@ export default{
                     <tr v-for="item, index in allQuestionnaire.slice(pageStart, pageEnd)">
                         <td >{{item.id}}</td>
                         <td ><a :key="index" @click="gotovote(index)" href="#">{{item.title}}</a></td>
-                        <td >{{getPublishedStatus(item.startDate,item.endDate )}}</td>
+                        <td :class="{'redShow': isStartDatePast(item.startDate, item.endDate), 'greenShow': !isStartDatePast(item.startDate, item.endDate)}">{{getPublishedStatus(item.startDate,item.endDate )}}</td>
                         <td>{{item.startDate}}</td>
                         <td>{{item.endDate}}</td>
                         <td :key="index" ><a :key="index" @click="gocal(index)" href="#">統計連結</a></td>
@@ -330,10 +338,11 @@ flex-direction: column;
     width: 80vw;
     height: 65vh;
     background-color: rgb(218, 218, 218);
-    border-radius: 5px;
+    border-radius: 10px;
     table {
             width: 100%;
             border-collapse: collapse;
+            border-radius: 10px;
         }
         th, td {
             border: 1px solid black;
@@ -343,6 +352,7 @@ flex-direction: column;
         th {
             background-color: rgb(187, 186, 186);
         }
+
     }
     .pageNumber{
         width: 30vw;
@@ -358,8 +368,14 @@ flex-direction: column;
         }
     }
 }
-
-.highlighted {
-    color: red;
+.greenShow {
+    color: green; /* 设置绿色 */
 }
+
+.redShow {
+    color: red; /* 设置红色 */
+}
+
+
+
 </style>

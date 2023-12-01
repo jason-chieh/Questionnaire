@@ -47,14 +47,9 @@ export default{
                 const questionTitle = document.createElement('p');
                 //設定問題標題 並且設定樣式
                 questionTitle.textContent =question.quid+"."+ question.qtitle;
-                questionTitle.setAttribute('style', 'font-size: 20pt;font-weight: bold;margin: 0 0 ;width:60vh'); //小問題設定字型大小
+                questionTitle.setAttribute('style', 'font-size: 20pt;font-weight: bold;margin: 0 0 ;width:70vh'); //小問題設定字型大小
                 // 把問題名稱塞進div包起來
                 questionDiv.appendChild(questionTitle);
-                //假如有必填
-                if(question.necessary==true){
-                    questionTitle.textContent = questionTitle.textContent+"--(必填)"
-                }
-
 
 
                 // 新增一個答案show出區
@@ -65,42 +60,25 @@ export default{
 
 
 
-                        // 拆分選項（假設選項以分號分隔）
-                        const options = question.option.split(';');
-                        for(let i =0 ; i<options.length;i++){
-                            options[i] = (i+1)+"."+options[i]
+                        // // 拆分選項（假設選項以分號分隔）
+                        // const options = question.option.split(';');
+                        // for(let i =0 ; i<options.length;i++){
+                        //     options[i] = (i+1)+"."+options[i]
+                        // }
+                        if(question.optionType=="單選"){
+                            questionTitle.textContent =  questionTitle.textContent +"--單選題"
                         }
-                        // 遍歷選項，創建並添加選項到問題容器中
-                        options.forEach(option => {
-                            // const label = document.createElement('label');
-                            // const input = document.createElement('input');
-                            // const finalCompute = document.createElement('div');
-                            if(question.optionType=="單選"){
-                                // const label = document.createElement('p');
-                                // label.textContent =option;
-                                // label.setAttribute('id',option);
-                                // questionAnswer.appendChild(label);
-                                // finalCompute.setAttribute('style', 'height:30vh;width:40vh;background-color:gray;overflow: auto')
-                                // input.setAttribute('value', option); //設定被勾選的value值
-                                // label.appendChild(document.createTextNode(option));
-                            }
-                            if(question.optionType=="多選"){
-                                // const label = document.createElement('p');
-                                // label.textContent =option;
-                                // questionAnswer.appendChild(label);
-                                // finalCompute.setAttribute('style', 'height:30vh;width:40vh;background-color:gray;overflow: auto')
-                                // input.setAttribute('value', option); //設定被勾選的value值
-                                // label.appendChild(document.createTextNode(option));
-                            }
-                            if(question.optionType=="文字回答"){
-                                // finalCompute.setAttribute('style', 'height:30vh;width:40vh;background-color:gray;overflow: auto')
-                                
-                                // input.setAttribute('type', 'textarea'); // 取決於 optionType
-                                // input.setAttribute('style', 'width: 300px; height: 50px;resize: none;');
-                            }
-                            // label.appendChild(input);
-                            // questionDiv.appendChild(finalCompute);
-                        })
+                        if(question.optionType=="多選"){
+                            questionTitle.textContent =  questionTitle.textContent +"--多選題"
+                        }
+                        if(question.optionType=="文字回答"){
+                            questionTitle.textContent =  questionTitle.textContent +"--文字回答"
+                        }
+                        //假如有必填
+                        if(question.necessary==true){
+                            questionTitle.textContent = questionTitle.textContent+"--(必填)"
+                            questionTitle.setAttribute('style',"font-size: 20pt;font-weight: bold;margin: 0 0 ;width:70vh;color:red;")
+                        }
 
                         LeftQuestionDiv.appendChild(questionTitle)
                         LeftQuestionDiv.appendChild(questionAnswer)
@@ -110,6 +88,8 @@ export default{
 
 
                 // =================================================================以上是生成問題
+
+                        //將使用者的答案抓出來
                         var PlusAns =[]
                         this.userDataArr.forEach(item=>{
                             if(item.qid==question.quid){
@@ -117,10 +97,27 @@ export default{
                             }
                         })
                         console.log(PlusAns)
+    
+                        if(question.optionType=="多選"){
+                            
+                            let newArray = PlusAns.flatMap(item => {
+                            if (item === '該使用者未作答') {
+                                return item;
+                            } else {
+                                let splitItems = item.split(';').filter(Boolean);
+                                return splitItems;
+                            }
+                            });
+                            PlusAns = newArray
+                            console.log(newArray);
+                            console.log("你好我是多選")
+                        }
 
 
+
+                        //開始判斷資料有幾個出現一樣的答案
                         const frequencyCount = {};
-                        // 遍历数组，并统计每个字符串出现的次数
+                        // 抓出來便利，並統計每個字符串出現的次数
                         PlusAns.forEach((item) => {
                             if (frequencyCount[item]) {
                                 frequencyCount[item] += 1;
@@ -129,19 +126,20 @@ export default{
                             }
                         });
 
+                        //建立給圖表的陣列
                         var circleContent = [];
                         var circleNum = [];
-                        // 打印结果
+                        // 印出结果
                         for (const key in frequencyCount) {
                             if (frequencyCount.hasOwnProperty(key)) {
                                 // console.log(`'${key}' 回答了 ${frequencyCount[key]} 次`);
                                 circleContent.push(`${key}`)
                                 circleNum.push(`${frequencyCount[key]}`)
-                                console.log(circleContent)
-                                console.log(circleNum)
+                                // console.log(circleContent)
+                                // console.log(circleNum)
                                 const userChoose = document.createElement('p');
                                 userChoose.setAttribute('style', 'font-size: 16pt;margin: 0 0;'); //小問題設定字型大小
-                                userChoose.textContent =`'${key}'  ${frequencyCount[key]} 次`;
+                                userChoose.textContent =`${key}------${frequencyCount[key]}`;
                                 questionAnswer.appendChild(userChoose);
                             }
                         }
@@ -155,42 +153,42 @@ export default{
                         questionDiv.appendChild(RightQuestionDiv);  
 
                         
-                        // 创建canvas元素
+                        // 創建canvas元素
                         const canvas = document.createElement('canvas');
-                        canvas.width = 100; // 设置canvas的宽度
-                        canvas.height = 100; // 设置canvas的高度
+                        canvas.width = 100; // 設置canvas的寬度
+                        canvas.height = 100; // 設置canvas的高度
                         var iddd =question.quid.toString();
                         canvas.id = 'myPieChart'+iddd;
 
-                        // 检查是否成功创建了canvas元素
+                        // 檢查是否成功創建了canvas元素
                         if (canvas.getContext) {
                             const ctx = canvas.getContext('2d');
 
-                            // 将canvas添加到创建的容器中
+                            // 將canvas添加到創建的容器中
                             RightQuestionDiv.appendChild(canvas);
 
-                            // 图表数据
+                            // 圖表數據
                             const data = {
-                                labels: circleContent,
+                                labels: circleContent,/////////圖表名子分類是陣列!!!!!!!!!!!!!
                                 datasets: [{
                                     data: circleNum,
                                     backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0'],
                                 }]
                             };
 
-                            // 图表选项
+                            // 圖表選項
                             const options = {
                                 // 在这里添加你的图表选项
                             };
 
-                            // 创建新的Chart实例
+                            // 創建新的圖表視窗
                             new Chart(ctx, {
                                 type: 'pie',
                                 data: data,
-                                options: options
+                                options: options   //圖表答案%%%選項是陣列
                             });
                         } else {
-                            // 浏览器不支持Canvas
+                            // 瀏覽器不支持Canvas
                             console.error('当前浏览器不支持Canvas。');
                         }
                 //=============================================================================
@@ -289,6 +287,7 @@ export default{
     <div class="bg">  
         <h1>問卷統計圖表</h1>
         <div class="showBlock">
+            
             <h4 style="font-size: 18pt;" id="timeShow">{{123}}</h4>
             <h1 style="font-size: 40pt;" id="nameShow">{{12}}</h1>
             <div id="questionPlaceId" class="questionPlace">
@@ -303,12 +302,12 @@ export default{
 
 .bg{
     width: 100vw;
-
     background-color: #00A9FF;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    overflow: auto;
 
 
     .showBlock{

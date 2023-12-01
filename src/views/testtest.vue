@@ -231,6 +231,7 @@ export default{
         console.log(this.aaa)
 
         this.renderPieChart()
+        
 
 
         
@@ -256,6 +257,7 @@ export default{
         <button type="submit" @click="delete231" id="btn">新增問題</button>
         <button type="submit" @click="goBackDelQn" id="btn">後臺山問卷</button>
         <button style="width: 50px;height: 50px;" type="submit" @click="" id="btn">vuex練習</button>
+        <p>{{$route.params.aaa}}</p>
     </div>
     <div id="question-container" style="width: 50px;height: 50px;" class="question-cont">
     </div>

@@ -2,6 +2,7 @@
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
 import Swal from 'sweetalert2'
+import CalView from './CalView.vue';
 
 export default{
     data(){
@@ -55,12 +56,34 @@ export default{
             answerTime:"時間",
         }
     },
+    components:{
+        CalView
+    },
     methods:{
+        // 特效提示框-成功新增
+        specialNotion100(){
+            Swal.fire({
+                position: "mid-center",
+                icon: "success",
+                title: "讚啦",
+                showConfirmButton: false,
+                timer: 1500
+                });
+        },
         // 特效提示框-更新失敗
         specialNotion1(){
             Swal.fire({
                 title: '不能更新!',
                 text: '請更新未發佈或是未開始~',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
+        // 特效提示框-禁止新增模式去瀏覽統計
+        specialNotion22(){
+            Swal.fire({
+                title: '還沒新增看什麼看!',
+                text: '',
                 icon: 'error',
                 confirmButtonText: 'ok'
                 })
@@ -93,7 +116,16 @@ export default{
             this.page=2.7
         },
         goCalCircle(){
-            this.page=4
+            if(this.updateNum==-1){
+                this.specialNotion22()
+                return
+            }
+            this.settellCircleWhichOne(this.updateNum);
+            this.searchUserDataP().then(() => {
+                // 確保在導航之前所有非同步操作都已完成
+                this.page=4
+            });
+            
         },
         goPeople(){
             this.seeUserNum=0
@@ -202,7 +234,7 @@ export default{
 
         },
         // pinia抓取時間
-        ...mapActions(day,["getCurrentDate","geteditQuestionnaire","searchAllQna"]),
+        ...mapActions(day,["getCurrentDate","geteditQuestionnaire","searchAllQna","searchUserDataP","settellCircleWhichOne"]),
 
 
 
@@ -547,7 +579,7 @@ export default{
     },
     updated(){
         // const checkboxt = document.getElementById("checkboxt")
-        // console.log(this.updateNum)
+        console.log(this.updateNum)
         // console.log(this.question_list)
     }
 }
@@ -665,6 +697,10 @@ export default{
             </div>
             <!-- 統計圖表 -->
             <div v-if="page==4" class="circleCal">
+                    <div class="CalViewView">
+                        <CalView></CalView> 
+                    </div>
+                    
             </div>
 
             <!-- 編輯畫面 -->
@@ -731,6 +767,7 @@ $maincolor2:rgb(218, 218, 218);
         height: 80vh;
         background-color: $maincolor2;
         border: 2px solid black;
+        overflow: hidden; 
         .top{
             width: 90vw;
             height: 10vh;
@@ -933,8 +970,16 @@ $maincolor2:rgb(218, 218, 218);
         // 統計圖表
         .circleCal{
             width: 90vw;
-            height: 60vh;
-            background-color: pink;
+            .CalViewView {
+                // overflow: auto;
+                    width: 100%; 
+                    height: 100%; 
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    overflow: auto;
+                    
+            }
         }
         .addQuestionEdit{
             position: absolute;
@@ -1010,4 +1055,5 @@ $maincolor2:rgb(218, 218, 218);
         }
     }
 }
+
 </style>
