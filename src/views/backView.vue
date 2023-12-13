@@ -262,6 +262,8 @@ export default{
             .then((res) => res.json())
             .catch((error) => console.error("Error:", error))
             .then((response) => console.log("Success:", response));
+
+            this.searchAllQn();
         },
         // 處理問卷文字狀態  
         getPublishedStatus(published,startDate,endDate) {
@@ -443,19 +445,22 @@ export default{
 <style lang="scss" scoped>
 $maincolor:#00A9FF;
 .bg{
+    
     width: 100vw;
-    background-color: #00A9FF;
+    background-color: #FFC7C7;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
     h1{
+        color: black;
         margin-top: 0;
+        font-family: "Helvetica", "Arial","LiHei Pro","黑體-繁","微軟正黑體", sans-serif;
     }
     .searchBlock{
         width: 80vw;
         height: 20vh;
-        background-color: rgb(218, 218, 218);
+        background-color: #FFE2E2;
         display: flex;
         .searchBlockLeft{
             width: 40vw;
@@ -509,7 +514,7 @@ $maincolor:#00A9FF;
                 font-size: 16pt;
                 transition: 1s;
                 margin-top: 7vh;
-                background-color: gray;
+                background-color: #6096B4;
                 &:hover{
                     color: white;
                 }
@@ -546,8 +551,8 @@ $maincolor:#00A9FF;
     }
     .showBlock{
         width: 80vw;
-        height: 65vh;
-        background-color: rgb(218, 218, 218);
+        min-height: 68vh;
+        background-color: #FFE2E2;
         border-radius: 5px;
         table {
                 width: 100%;
@@ -559,7 +564,7 @@ $maincolor:#00A9FF;
                 text-align: center;
             }
             th {
-                background-color: rgb(187, 186, 186);
+                background-color: #6096B4;
 
         }
     }

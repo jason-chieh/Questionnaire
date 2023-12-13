@@ -88,6 +88,15 @@ export default{
                 confirmButtonText: 'ok'
                 })
         },
+        // 特效提示框-禁止新增模式去瀏覽統計
+        specialNotion101(){
+            Swal.fire({
+                title: '錯誤的新增問卷沒填齊!',
+                text: '',
+                icon: 'error',
+                confirmButtonText: 'ok'
+                })
+        },
         // 特效提示框-更新成功
         specialNotion(){
             Swal.fire({
@@ -189,6 +198,10 @@ export default{
         },
         // 從確認頁前往後端新增
         gotobackAndAdd(){
+            if(this.question_list.length==0||this.questionnaireName==""||this.questionnaireContent==""){
+                this.specialNotion101();
+                return
+            }
             this.addquestionnaire();
             this.specialNotion();
             this.$router.push("/backView")
@@ -460,11 +473,21 @@ export default{
             }
                 // 創建問題的容器 div
                 const questionDiv = document.createElement('div');
+                
 
                 // 添加問題標題
                 const questionTitle = document.createElement('p');
                 questionTitle.textContent =question.quid+"."+ question.qtitle;
                 questionDiv.appendChild(questionTitle);
+
+
+
+                if(question.necessary==true){
+                    const questionNecessary = document.createElement('p');
+                    questionNecessary.textContent ="必填";
+                    questionNecessary.setAttribute('style', 'color:red;')
+                    questionDiv.appendChild(questionNecessary)
+                }
 
                 // 拆分選項（假設選項以分號分隔）
                 const options = question.option.split(';');
@@ -472,7 +495,9 @@ export default{
                 options.forEach(option => {
                 const label = document.createElement('label');
                 const input = document.createElement('input');
+
                 if(question.optionType=="單選"){
+
                     input.setAttribute('type', 'radio'); //取決於 optionType
                     label.appendChild(document.createTextNode(option));
                 }
@@ -753,8 +778,8 @@ export default{
 </template>
 
 <style lang="scss" scoped>
-$maincolor:#00A9FF;
-$maincolor2:rgb(218, 218, 218);
+$maincolor:#FFC7C7;
+$maincolor2:#FFE2E2;
 .bg{
     width: 100vw;
     height: 90vh;
@@ -780,7 +805,7 @@ $maincolor2:rgb(218, 218, 218);
                 background-color: transparent;
                 margin: 0 1vw;
                 border: 0;
-                background-color: rgb(124, 124, 124);
+                background-color: #6096B4;
                 border-radius: 5px;
                 color: white;
                 &:hover{
@@ -937,6 +962,7 @@ $maincolor2:rgb(218, 218, 218);
             }
             .questionPlace{
                 width: 70vw;
+                min-height: 50vh;
                 border: 1px solid black;
                 padding: 2% 2%;
                 margin-bottom: 5vh;
@@ -944,16 +970,14 @@ $maincolor2:rgb(218, 218, 218);
         }
         // 問卷回饋的人
         .questionPeople{
-            min-height: 55vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
+            height: 65vh;
+            margin-left: 13%;
             padding: 2% 2%;
+            overflow: auto;
                 table {
                         width: 60vw;
                         border-collapse: collapse;
-                        background-color: rgb(141, 141, 228);
+                        background-color: rgb(221, 220, 220);
                     }
                     tbody{
                         min-height: 40vh;
@@ -964,7 +988,7 @@ $maincolor2:rgb(218, 218, 218);
                         text-align: center;
                     }
                     th {
-                        background-color: rgb(187, 186, 186);
+                        background-color: #6096B4;
                     }
         }
         // 統計圖表
@@ -1047,10 +1071,10 @@ $maincolor2:rgb(218, 218, 218);
                 color: white;
             }
             .chancel{
-                background-color: gray;
+                background-color: #6096B4;
             }
             .send{
-                background-color: rgb(59, 161, 59);
+                background-color: #6096B4;
             }
         }
     }

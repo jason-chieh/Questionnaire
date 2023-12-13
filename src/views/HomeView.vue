@@ -1,7 +1,7 @@
 <script>
 import {mapState,mapActions} from 'pinia'
 import day from '../stores/day'
-
+import { RouterLink } from 'vue-router'
 import Swal from 'sweetalert2'
 
 
@@ -23,7 +23,7 @@ export default{
         }
     },
     components:{
-        
+        RouterLink
     },
     methods:{
         testt(){
@@ -204,7 +204,7 @@ export default{
             </div>
             <div class="searchBlockRight">
                 <button @click="searchAllQn()" class="search bb" type="button">search</button>
-                <!-- <button @click="testt()" class="search bb" type="button"></button> -->
+                <!-- //<button  class="search bb" type="button"><RouterLink :to="'/testtest/'+this.testNum">你好</RouterLink></button> -->
             </div>
         </div>
         <!-- 問卷修出內容 -->
@@ -259,7 +259,7 @@ export default{
 $maincolor:#00A9FF;
 .bg{
 width: 100vw;
-background-color: #00A9FF;
+background-color: #93BFCF;
 display: flex;
 justify-content: center;
 align-items: center;
@@ -267,9 +267,10 @@ flex-direction: column;
     .searchBlock{
         width: 80vw;
         height: 20vh;
-        background-color: rgb(218, 218, 218);
+        background-color: #BDCDD6;
         display: flex;
         margin-top: 5vh;
+        border-radius: 10px;
         .searchBlockLeft{
             width: 40vw;
             height: 20vh;
@@ -325,8 +326,10 @@ flex-direction: column;
                 margin-top: 7vh;
             }
             .search{
-                background-color: gray;
+                background-color: #6096B4;
                 font-size: 16pt;
+                border-radius: 10px;
+                // color: white;
                 &:hover{
                     color: white;
                 }
@@ -336,8 +339,8 @@ flex-direction: column;
     .showBlock{
     margin-top: 5vh;
     width: 80vw;
-    height: 65vh;
-    background-color: rgb(218, 218, 218);
+    min-height: 68vh;
+    background-color: #BDCDD6;
     border-radius: 10px;
     table {
             width: 100%;
@@ -350,7 +353,7 @@ flex-direction: column;
             text-align: center;
         }
         th {
-            background-color: rgb(187, 186, 186);
+            background-color: #6096B4;
         }
 
     }

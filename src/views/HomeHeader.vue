@@ -37,9 +37,9 @@ export default{
         <div class="headRight">
             <button @click="gotohome" type="button">列表頁</button>
             <button @click="gotoback" type="button">暫時性後台通道</button>
-            <button @click="gotologin" type="button">登入</button>
-            <button @click="gotosign" type="button">註冊</button>
-            <button @click="gototesttest" type="button">testtest</button>
+            <!-- <button @click="gotologin" type="button">登入</button>
+            <button @click="gotosign" type="button">註冊</button> -->
+            <!-- <button @click="gototesttest" type="button">testtest</button> -->
         </div>
     </div>
 
@@ -49,11 +49,11 @@ export default{
 .header{
     width: 100vw;
     height: 10vh;
-    background-color: #89CFF3;
+    background-color: #6096B4;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    color: black;
+    color: white;
     .headLeft{
         width: 50vw;
         display: flex;
@@ -74,6 +74,7 @@ export default{
         margin: 0 2%;
         font-size: 20pt;
         transition: 0.5s;
+        color: white;
         &:hover{
             color: gold;
         }

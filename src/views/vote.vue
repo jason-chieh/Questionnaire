@@ -220,11 +220,9 @@ export default{
 
 
 
-//=======================================================================================
+//=======================================================================================把所有單選題的input資料抓出來
             const radioAnswers = {};
             const radioInputs = form.querySelectorAll('input[type="radio"]:checked');
-
-
 
             radioInputs.forEach(input => {
                 const questionName = input.getAttribute('name');
@@ -236,7 +234,7 @@ export default{
 
             console.log('單選按鈕作答答案：', radioAnswers);
             console.log(typeof radioAnswers);
-//========================================================================================
+//========================================================================================把所有多選題的input資料抓出來
             const checkboxAnswers = {};
             const checkboxInputs = form.querySelectorAll('input[type="checkbox"]:checked');
 
@@ -257,11 +255,10 @@ export default{
                 checkboxArr.push(checkboxAnswers.null)
             });
 
-
             console.log('多選框作答答案：', checkboxAnswers.null);
             console.log(typeof checkboxAnswers);
             // 可以將答案進行其他處理或儲存
-//==========================================================================================
+//==========================================================================================把所有問答題的input資料抓出來
                 const textAnswers = {};
                 const textInputs = form.querySelectorAll('input[type="textarea"]');
 
@@ -486,7 +483,7 @@ export default{
 
 .bg{
     width: 100vw;
-    background-color: #00A9FF;
+    background-color: #93BFCF;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -494,7 +491,7 @@ export default{
     .answerPlace{
         width: 80vw;
         min-height:70vh;
-        background-color: rgb(218, 218, 218);
+        background-color: white;
         padding: 3% 3%;
 
         h1{
@@ -514,8 +511,10 @@ export default{
             margin-bottom: 2vh;
         }
         .questionPlace{
-        background-color: rgb(218, 218, 218);
+        padding: 1% 1%;
+        background-color: rgb(194, 192, 192);
         border-radius: 5px;
+        min-height: 50vh;
             label{
                 font-size: 16pt;
                 font-weight: bold;
@@ -534,7 +533,7 @@ export default{
 
 .bg2{
     width: 100vw;
-    background-color: #00A9FF;
+    background-color: #93BFCF;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -542,7 +541,7 @@ export default{
     .checkAnswerPlace{
         width: 80vw;
         min-height:70vh;
-        background-color: rgb(218, 218, 218);
+        background-color: white;
         padding: 3% 3%;
 
         h1{
@@ -558,9 +557,11 @@ export default{
             margin-bottom: 2vh;
         }
         .checkquestionPlace{
-        background-color: rgb(218, 218, 218);
+            padding: 1% 1%;
+        min-height: 40vh;
+        background-color: rgb(194, 192, 192);
         border-radius: 5px;
-        border: 1px solid black;
+        // border: 1px solid black;
             label{
                 font-size: 16pt;
                 font-weight: bold;

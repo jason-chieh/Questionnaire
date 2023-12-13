@@ -42,7 +42,7 @@ export default{
                 LeftQuestionDiv.setAttribute("class","LeftQuestionDiv")
                 LeftQuestionDiv.setAttribute("style","padding: 2% 2%;")
                 const questionDiv = document.createElement('div');
-                questionDiv.setAttribute('style', 'min-height:50vh;min-width:70vh;margin-bottom: 5vh;background-color:pink;display: flex;'); 
+                questionDiv.setAttribute('style', 'min-height:50vh;min-width:70vh;margin-bottom: 5vh;background-color:rgb(194, 192, 192);display: flex;'); 
                 // 添加問題標題
                 const questionTitle = document.createElement('p');
                 //設定問題標題 並且設定樣式
@@ -302,7 +302,7 @@ export default{
 
 .bg{
     width: 100vw;
-    background-color: #00A9FF;
+    background-color: #93BFCF;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -313,7 +313,7 @@ export default{
     .showBlock{
     width: 80vw;
     min-height: 80vh;
-    background-color: rgb(218, 218, 218);
+    background-color: rgb(223, 222, 222);
     border-radius: 5px;
         h4{
             text-align:end;
